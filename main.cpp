@@ -14,17 +14,17 @@
 using namespace std;
 
 const string mnemonics[MNE_CNT] = {
-							"INT", "JMP", "CALL", "RET", "JZ", "JNZ", "JGZ", "JGEZ", "JLZ", "JLEZ",
-							"LOAD", "STORE", "PUSH", "POP", "ADD", "SUB", "MUL", "DIV", "MOD", "AND",
-							"OR", "XOR", "NOT", "ASL", "ASR", "UBLOAD", "SBLOAD", "UWLOAD", "SWLOAD",
-							"BSTORE", "WSTORE" 
-						 };
+                            "INT", "JMP", "CALL", "RET", "JZ", "JNZ", "JGZ", "JGEZ", "JLZ", "JLEZ",
+                            "LOAD", "STORE", "PUSH", "POP", "ADD", "SUB", "MUL", "DIV", "MOD", "AND",
+                            "OR", "XOR", "NOT", "ASL", "ASR", "UBLOAD", "SBLOAD", "UWLOAD", "SWLOAD",
+                            "BSTORE", "WSTORE" 
+                         };
 
 const string system_defined_words[SDW_CNT] = {
-							"R0","R1","R2","R3","R4","R5","R6","R7","R8","R9","R10","R11","R12","R13","R14",
-							"R15","SP","PC"
-						};
-						// DUP, DEF, ORG?
+                            "R0","R1","R2","R3","R4","R5","R6","R7","R8","R9","R10","R11","R12","R13","R14",
+                            "R15","SP","PC"
+                        };
+                        // DUP, DEF, ORG?
 
 vector<string> user_defined_words;
 
@@ -37,285 +37,285 @@ bool is_digits(const string &str)
 }
 
 bool is_alphanum(const string &str){
-	 for (size_t i = 0;i<str.length();i++){
-	 	if (!isalnum(str[i]) && str[i] != '_') return false;
-	 }
-	 return true;
+     for (size_t i = 0;i<str.length();i++){
+        if (!isalnum(str[i]) && str[i] != '_') return false;
+     }
+     return true;
 }
 
 void strip_off_spaces(string &str){
 
-		while(!str.empty() && isspace(*str.begin()))
-    		str.erase(str.begin());
+        while(!str.empty() && isspace(*str.begin()))
+            str.erase(str.begin());
 
-    	while(!str.empty() && isspace(*str.rbegin()))
-    		str.erase(str.length()-1);
+        while(!str.empty() && isspace(*str.rbegin()))
+            str.erase(str.length()-1);
 }
 
 bool is_mnemonic(const string &str){
-	for (int i=0;i<MNE_CNT;i++){
-		if (mnemonics[i]==str) return true;
-	}
-	return false;
+    for (int i=0;i<MNE_CNT;i++){
+        if (mnemonics[i]==str) return true;
+    }
+    return false;
 }
 
 bool is_key_word(const string &str){
-	for (int i=0;i<SDW_CNT;i++){
-		if (system_defined_words[i]==str) return true;
-	}
-	for (size_t i=0;i<user_defined_words.size();i++){
-		if (user_defined_words[i] == str) return true;
-	}
-	return false;
+    for (int i=0;i<SDW_CNT;i++){
+        if (system_defined_words[i]==str) return true;
+    }
+    for (size_t i=0;i<user_defined_words.size();i++){
+        if (user_defined_words[i] == str) return true;
+    }
+    return false;
 }
 
 int main(){
 
-	ifstream infile("tekst");
+    ifstream infile("tekst");
 
-	string line;
-	string label_name;
-	bool is_line_labeled;
-	int line_counter = 0;
-	int section_id_counter = 0; // mozda visak
-	string section_type;
+    string line;
+    string label_name;
+    bool is_line_labeled;
+    int line_counter = 0;
+    int section_id_counter = 0; // mozda visak
+    string section_type;
 
-	// TODO: int location_counter = LC_START; 
+    // TODO: int location_counter = LC_START; 
 
-	// reset stream 
-	infile.clear();
-	infile.seekg(0);
+    // reset stream 
+    infile.clear();
+    infile.seekg(0);
 
-	while (getline(infile, line)){
-		std::size_t found;
-		std::size_t found_comma;
-		std::size_t found_space;
+    while (getline(infile, line)){
+        std::size_t found;
+        std::size_t found_comma;
+        std::size_t found_space;
 
 
-		is_line_labeled = false;
-		line_counter++;
+        is_line_labeled = false;
+        line_counter++;
 
-		// strip off spaces at the beginning of the line
-		while(!line.empty() && isspace(*line.begin()))
-    		line.erase(line.begin());
+        // strip off spaces at the beginning of the line
+        while(!line.empty() && isspace(*line.begin()))
+            line.erase(line.begin());
 
-    	// strip off comment before spaces 
-    	found = line.find(';');
-    	if (found != string::npos){
-    		line.erase(found, string::npos);
-    	}
+        // strip off comment before spaces 
+        found = line.find(';');
+        if (found != string::npos){
+            line.erase(found, string::npos);
+        }
 
-    	// strip off space at the end of the line
-    	while(!line.empty() && isspace(*line.rbegin()))
-    		line.erase(line.length()-1);
+        // strip off space at the end of the line
+        while(!line.empty() && isspace(*line.rbegin()))
+            line.erase(line.length()-1);
 
-    	// is it's empty line skip parsing
-    	if (line.empty()) continue;
-    	
-    	// check if line is labeled
-		found = line.find(":");
-		if (found != string::npos){
-			label_name = line.substr(0, found);
+        // is it's empty line skip parsing
+        if (line.empty()) continue;
+        
+        // check if line is labeled
+        found = line.find(":");
+        if (found != string::npos){
+            label_name = line.substr(0, found);
 
-			// TODO: LABEL_NAME MUST NOT BE ANY OF THE RESERVED WORDS
+            // TODO: LABEL_NAME MUST NOT BE ANY OF THE RESERVED WORDS
 
-			if (!is_alphanum(label_name) || is_key_word(label_name)){
-				cout << "Line: " << line_counter << ". Illegal label definition." << endl;
-				exit(1);
-			}
+            if (!is_alphanum(label_name) || is_key_word(label_name)){
+                cout << "Line: " << line_counter << ". Illegal label definition." << endl;
+                exit(1);
+            }
 
-			is_line_labeled = true;
+            is_line_labeled = true;
 
-			user_defined_words.push_back(label_name);
-			new Symbol(label_name, line_counter);
+            user_defined_words.push_back(label_name);
+            new Symbol(label_name, line_counter);
 
-			// strip off label and spaces
-			line.erase(0,found+1);
-			strip_off_spaces(line);
-		}
+            // strip off label and spaces
+            line.erase(0,found+1);
+            strip_off_spaces(line);
+        }
 
-    	// check if line is a section definition
-    	if (*line.begin()=='.'){
+        // check if line is a section definition
+        if (*line.begin()=='.'){
 
-    		// if it's end of file, break the loop
-    		if (line.substr(1,3) == "end") break;
+            // if it's end of file, break the loop
+            if (line.substr(1,3) == "end") break;
 
-    		if (line.substr(1,6) == "global"){
-    			found_space = line.find(" ");
-    			if (found_space == string::npos){
-    				cout << "Line: " << line_counter << ". .global arguments missing." << endl;
-    				exit(1);
-    			}
-    			string globals = line.substr(found_space+1, string::npos);
+            if (line.substr(1,6) == "global"){
+                found_space = line.find(" ");
+                if (found_space == string::npos){
+                    cout << "Line: " << line_counter << ". .global arguments missing." << endl;
+                    exit(1);
+                }
+                string globals = line.substr(found_space+1, string::npos);
 
-    			// TODO: PUT LINE IN LINE LIST
+                // TODO: PUT LINE IN LINE LIST
 
-    			continue;
-    		}
+                continue;
+            }
 
-    		// parse section name out of line
-    		string section_name;
-    		found = line.find('.',1);
-    		if (found != string::npos) section_name = line.substr(1, found -1);
-    		else{
-    			section_name = line;
-    			section_name.erase(section_name.begin());
-    		}
+            // parse section name out of line
+            string section_name;
+            found = line.find('.',1);
+            if (found != string::npos) section_name = line.substr(1, found -1);
+            else{
+                section_name = line;
+                section_name.erase(section_name.begin());
+            }
 
-    		// error?
-    		if (
-    			(section_name != "data" && section_name != "text" && section_name != "rodata" && section_name != "bss") || 
-    			(found != string::npos && !is_digits(line.substr(found+1, string::npos))) || (is_key_word(line))
-    			)
-    		{
-    			cout << "Line: " << line_counter << ". Illegal section definition." << endl;
-    			exit(1);
-    		}
+            // error?
+            if (
+                (section_name != "data" && section_name != "text" && section_name != "rodata" && section_name != "bss") || 
+                (found != string::npos && !is_digits(line.substr(found+1, string::npos))) || (is_key_word(line))
+                )
+            {
+                cout << "Line: " << line_counter << ". Illegal section definition." << endl;
+                exit(1);
+            }
 
-    		section_type = section_name;
+            section_type = section_name;
 
-    		section_id_counter++;
+            section_id_counter++;
 
-    		user_defined_words.push_back(line);
-    		new Symbol(line, line_counter);
-    		// TODO: PUT LINE IN LINE LIST
+            user_defined_words.push_back(line);
+            new Symbol(line, line_counter);
+            // TODO: PUT LINE IN LINE LIST
 
-    		continue;
-    	}
+            continue;
+        }
 
-    	if (section_type.empty()){
-    		cout << "Line: " << line_counter << ". Not in section." << endl;
-    		exit(1);
-    	}
+        if (section_type.empty()){
+            cout << "Line: " << line_counter << ". Not in section." << endl;
+            exit(1);
+        }
 
-    	// check if line is a DEF directive
-    	found = line.find(" DEF ");
-    	if (found != string::npos){
-    		found_space = line.find(" ");
-    		string symbol_name = line.substr(0, found_space);
+        // check if line is a DEF directive
+        found = line.find(" DEF ");
+        if (found != string::npos){
+            found_space = line.find(" ");
+            string symbol_name = line.substr(0, found_space);
 
-			// TODO: SYMBOL_NAME MUST NOT BE ANY OF THE RESERVED WORDS
+            // TODO: SYMBOL_NAME MUST NOT BE ANY OF THE RESERVED WORDS
 
-    		if (!is_alphanum(symbol_name) || is_key_word(symbol_name)){
-    			cout << "Line: " << line_counter << ". Illegal constant definition." << endl;
-				exit(1);
-    		}
-    		string symbol_value = line.substr(found+5, string::npos);
+            if (!is_alphanum(symbol_name) || is_key_word(symbol_name)){
+                cout << "Line: " << line_counter << ". Illegal constant definition." << endl;
+                exit(1);
+            }
+            string symbol_value = line.substr(found+5, string::npos);
 
-    		strip_off_spaces(symbol_value);
+            strip_off_spaces(symbol_value);
 
-    		// cout << "DEF" << endl;
-    		// cout << "name:" << symbol_name << "*" << endl;
-    		// cout << "value:" << symbol_value << "*" << endl;
-    		// cout << endl;
+            // cout << "DEF" << endl;
+            // cout << "name:" << symbol_name << "*" << endl;
+            // cout << "value:" << symbol_value << "*" << endl;
+            // cout << endl;
 
-    		// TODO: PUT CONSTANT IN SYMBOL TABLE
-    		// TODO: PUT LINE IN LINE LIST
-    		continue;
-    	}
+            // TODO: PUT CONSTANT IN SYMBOL TABLE
+            // TODO: PUT LINE IN LINE LIST
+            continue;
+        }
 
-    	// check if line is an ORG directive
-    	if (line.substr(0,4) == "ORG "){
-    		// TODO: ASSIGN NEW VALUE TO LC
-    		// TODO: PUT LINE IN LINE LIST
-    		// TODO: NEXT LINE MUST BE SECTION
-    		continue;
-    	}
+        // check if line is an ORG directive
+        if (line.substr(0,4) == "ORG "){
+            // TODO: ASSIGN NEW VALUE TO LC
+            // TODO: PUT LINE IN LINE LIST
+            // TODO: NEXT LINE MUST BE SECTION
+            continue;
+        }
 
-    	// check if line is defining data
-    	if ((line[0] == 'D') && 
-    		(line[1]=='B' || line[1]=='W' || line[1]=='D') &&
-    		(line[2] == ' ') 
-    		){
+        // check if line is defining data
+        if ((line[0] == 'D') && 
+            (line[1]=='B' || line[1]=='W' || line[1]=='D') &&
+            (line[2] == ' ') 
+            ){
 
-    		string data_value = "";
-    		string data_rept = "";
+            string data_value = "";
+            string data_rept = "";
 
-    		found = line.find(" DUP ");
-    		if (found != string::npos){
-    			data_rept = line.substr(2, found-2);
-    			data_value = line.substr(found+4, string::npos);
-    		}else{
-    			data_value = line.substr(3, string::npos);
-    		}
-    		strip_off_spaces(data_value);
-    		strip_off_spaces(data_rept);
+            found = line.find(" DUP ");
+            if (found != string::npos){
+                data_rept = line.substr(2, found-2);
+                data_value = line.substr(found+4, string::npos);
+            }else{
+                data_value = line.substr(3, string::npos);
+            }
+            strip_off_spaces(data_value);
+            strip_off_spaces(data_rept);
 
-    		// cout << "DD" << endl;
-    		// cout << "value:" << data_value << "*" << endl;
-    		// cout << "rept:" << data_rept << "*" << endl;
-    		// cout << endl;
+            // cout << "DD" << endl;
+            // cout << "value:" << data_value << "*" << endl;
+            // cout << "rept:" << data_rept << "*" << endl;
+            // cout << endl;
 
-    		// TODO: ASSIGN NEW VALUE TO LC
-    		// TODO: PUT LINE IN LINE LIST
-    		// TODO: WRITE TO OBJECT FILE?
+            // TODO: ASSIGN NEW VALUE TO LC
+            // TODO: PUT LINE IN LINE LIST
+            // TODO: WRITE TO OBJECT FILE?
 
-    		continue;
-    	}
+            continue;
+        }
 
-    	found = line.find(" ");
-    	if (found != string::npos){
-    		string mnemonic = line.substr(0, found);
-    		if (!is_mnemonic(mnemonic)){
-    			cout << "Line: " << line_counter << ". Mnemonic syntax error.";
-    			cout << "\"" << mnemonic << "\"" << " is not a mnemonic." << endl;
-    			exit(1);
-    		}
+        found = line.find(" ");
+        if (found != string::npos){
+            string mnemonic = line.substr(0, found);
+            if (!is_mnemonic(mnemonic)){
+                cout << "Line: " << line_counter << ". Mnemonic syntax error.";
+                cout << "\"" << mnemonic << "\"" << " is not a mnemonic." << endl;
+                exit(1);
+            }
 
-    		// strip off mnemonic and make ops_string which contains all the operands
-    		string ops_string = line.substr(found+1, string::npos);
+            // strip off mnemonic and make ops_string which contains all the operands
+            string ops_string = line.substr(found+1, string::npos);
 
-    		// strip off spaces from ops_string 
-			strip_off_spaces(ops_string);
+            // strip off spaces from ops_string 
+            strip_off_spaces(ops_string);
 
-			// max of 3 operands are allowed, ops[i] will be empty if less
-    		string ops[3];
+            // max of 3 operands are allowed, ops[i] will be empty if less
+            string ops[3];
 
-    		// parsing operands:
-    		// split string with comma, strip off spaces, if empty -> error
-    		// if more then 3 commas -> error
-    		// cut string in each iteration
-    		for (int i=0;i<3;i++){
-    			
-    			found_comma = ops_string.find(",");
-    			ops[i] = ops_string.substr(0,found_comma);
+            // parsing operands:
+            // split string with comma, strip off spaces, if empty -> error
+            // if more then 3 commas -> error
+            // cut string in each iteration
+            for (int i=0;i<3;i++){
 
-    			strip_off_spaces(ops[i]);
+                found_comma = ops_string.find(",");
+                ops[i] = ops_string.substr(0,found_comma);
 
-    			if (ops[i].empty()){
-    				cout << "Line: " << line_counter << ". Comma syntax error." << endl;
-    				exit(1);
-    			}
+                strip_off_spaces(ops[i]);
 
-    			ops_string.erase(0,found_comma+1);
-    			if (found_comma == string::npos) break;
-    		}
+                if (ops[i].empty()){
+                    cout << "Line: " << line_counter << ". Comma syntax error." << endl;
+                    exit(1);
+                }
 
-    		// if there were 3 or more commas
-    		if (found_comma != string::npos){
-    			cout << "Line: " << line_counter << ". Too many arguments." << endl;
-    			exit(1);
-    		}
+                ops_string.erase(0,found_comma+1);
+                if (found_comma == string::npos) break;
+            }
 
-    		// for (int i=0;i<3;i++){
-    		// 	cout << " *" << ops[i] << "* ";
-    		// }
-    		// cout << endl;
-    	
-    		// TODO: ASSIGN NEW VALUE TO LC
-    		// TODO: PUT LINE IN LINE LIST
-    		// TODO: CHECK OPS FOR ERRORS, IN SECOND PASS?
-    		
-    		continue;
-    	}
+            // if there were 3 or more commas
+            if (found_comma != string::npos){
+                cout << "Line: " << line_counter << ". Too many arguments." << endl;
+                exit(1);
+            }
 
-    	cout << "Line: " << line_counter << ". Syntax error." << endl;
-		exit(1);
-	}
+            // for (int i=0;i<3;i++){
+            //  cout << " *" << ops[i] << "* ";
+            // }
+            // cout << endl;
+        
+            // TODO: ASSIGN NEW VALUE TO LC
+            // TODO: PUT LINE IN LINE LIST
+            // TODO: CHECK OPS FOR ERRORS, IN SECOND PASS?
+            
+            continue;
+        }
 
-	cout << "#LINES:" << line_counter << "." << endl << endl;
+        cout << "Line: " << line_counter << ". Syntax error." << endl;
+        exit(1);
+    }
 
-	Symbol::printAll();
+    cout << "#LINES:" << line_counter << "." << endl << endl;
 
-	return 0;
+    Symbol::printAll();
+
+    return 0;
 }
