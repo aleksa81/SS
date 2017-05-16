@@ -1,3 +1,6 @@
+     .global a, b, c
+     .global g,h,j
+
      .data.4                                 
 
 labela_1: DW 5              
@@ -9,7 +12,7 @@ labela_1: DW 5
       aasd_a    DEF 561  ; asd
 
 
-  .data
+  .data.6
 
   .global a,b,c
 
@@ -25,7 +28,7 @@ labela_1: DW 5
        SUB R1, R1,#34 ; asdasd
 
        				JZ R0, $x ; asd
-.data
+.data.5
 a: DD a
 ORG 0x20
 .text
@@ -35,7 +38,7 @@ LOAD R3, $a ; ucitava sadrzaj lokacije a u registar R3 koristeci PC relativno ad
 x: JZ R0, x  ; apsolutni skok na lokaciju x
 JZ R0, $x ; PC relativni skok na lokaciju x
 
-a DEF 4
+b DEF 4
 
 LOAD R1, [  123 +  a ],a
 

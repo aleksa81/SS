@@ -1,14 +1,15 @@
 #include <iostream>
 #include <string>
-#include "symbol.h"
 #include <stdio.h>
 #include <fstream>
 #include <algorithm>
+#include <vector>
 #include "line.h"
+#include "symbol.h"
 
 #define LC_START (0)
 #define MNE_CNT (31)
-#define KW_CNT (18)
+#define SDW_CNT (18)
 
 using namespace std;
 
@@ -19,11 +20,13 @@ const string mnemonics[MNE_CNT] = {
 							"BSTORE", "WSTORE" 
 						 };
 
-const string key_words[KW_CNT] = {
+const string system_defined_words[SDW_CNT] = {
 							"R0","R1","R2","R3","R4","R5","R6","R7","R8","R9","R10","R11","R12","R13","R14",
 							"R15","SP","PC"
 						};
 						// DUP, DEF, ORG?
+
+vector<string> user_defined_words;
 
 // TODO: VECTOR OF USER DEFINED KEY WORDS
 // TODO: CHECK NAME AVAILABILITY FUNCTION
@@ -57,8 +60,11 @@ bool is_mnemonic(const string &str){
 }
 
 bool is_key_word(const string &str){
-	for (int i=0;i<KW_CNT;i++){
-		if (key_words[i]==str) return true;
+	for (int i=0;i<SDW_CNT;i++){
+		if (system_defined_words[i]==str) return true;
+	}
+	for (size_t i=0;i<user_defined_words.size();i++){
+		if (user_defined_words[i] == str) return true;
 	}
 	return false;
 }
@@ -71,7 +77,9 @@ int main(){
 	string label_name;
 	bool is_line_labeled;
 	int line_counter = 0;
-	int section_id_counter = 0;
+	int section_id_counter = 0; // mozda visak
+	string section_type;
+
 	// TODO: int location_counter = LC_START; 
 
 	// reset stream 
@@ -118,7 +126,8 @@ int main(){
 
 			is_line_labeled = true;
 
-			// TODO: PUT LABEL IN SYMBOL TABLE
+			user_defined_words.push_back(label_name);
+			new Symbol(label_name, line_counter);
 
 			// strip off label and spaces
 			line.erase(0,found+1);
@@ -156,19 +165,27 @@ int main(){
     		// error?
     		if (
     			(section_name != "data" && section_name != "text" && section_name != "rodata" && section_name != "bss") || 
-    			(found != string::npos && !is_digits(line.substr(found+1, string::npos)))
+    			(found != string::npos && !is_digits(line.substr(found+1, string::npos))) || (is_key_word(line))
     			)
     		{
     			cout << "Line: " << line_counter << ". Illegal section definition." << endl;
     			exit(1);
     		}
 
+    		section_type = section_name;
+
     		section_id_counter++;
 
-    		// TODO: PUT SECTION IN SYMBOL TABLE
+    		user_defined_words.push_back(line);
+    		new Symbol(line, line_counter);
     		// TODO: PUT LINE IN LINE LIST
 
     		continue;
+    	}
+
+    	if (section_type.empty()){
+    		cout << "Line: " << line_counter << ". Not in section." << endl;
+    		exit(1);
     	}
 
     	// check if line is a DEF directive
@@ -254,28 +271,22 @@ int main(){
 			// max of 3 operands are allowed, ops[i] will be empty if less
     		string ops[3];
 
-    		// parsing operands
+    		// parsing operands:
+    		// split string with comma, strip off spaces, if empty -> error
+    		// if more then 3 commas -> error
+    		// cut string in each iteration
     		for (int i=0;i<3;i++){
-
-    			// find first appearance of comma if any
+    			
     			found_comma = ops_string.find(",");
     			ops[i] = ops_string.substr(0,found_comma);
 
-    			// strip spaces, if MNE ,    ,
-    			// ops[i] will be just spaces and that's an error
-    			// that will be caught in next if 
     			strip_off_spaces(ops[i]);
 
-    			// if ops[i] is empty there is a syntax error:
-    			// MNE ,
-    			// MNE ,,
-    			// MNE a,b, - comma at the end
     			if (ops[i].empty()){
     				cout << "Line: " << line_counter << ". Comma syntax error." << endl;
     				exit(1);
     			}
 
-    			// erase operand from ops_string and go for the next operand
     			ops_string.erase(0,found_comma+1);
     			if (found_comma == string::npos) break;
     		}
@@ -286,10 +297,10 @@ int main(){
     			exit(1);
     		}
 
-    		for (int i=0;i<3;i++){
-    			cout << " *" << ops[i] << "* ";
-    		}
-    		cout << endl;
+    		// for (int i=0;i<3;i++){
+    		// 	cout << " *" << ops[i] << "* ";
+    		// }
+    		// cout << endl;
     	
     		// TODO: ASSIGN NEW VALUE TO LC
     		// TODO: PUT LINE IN LINE LIST
@@ -302,7 +313,9 @@ int main(){
 		exit(1);
 	}
 
-	cout << "#LINES:" << line_counter << "." << endl;
+	cout << "#LINES:" << line_counter << "." << endl << endl;
+
+	Symbol::printAll();
 
 	return 0;
 }
