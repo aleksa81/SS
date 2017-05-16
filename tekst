@@ -1,0 +1,56 @@
+     .data.4                                 
+
+labela_1: DW 5              
+
+       labela_2:            DD 3 ; asdfasdf ;;; asd
+       ;asdfadf
+  .text.1 ;asdf
+
+      aasd_a    DEF 561  ; asd
+
+
+  .data
+
+  .global a,b,c
+
+
+  		JMP   R1,  R2 
+
+  LOAD R1, [0x5564]
+		LOAD R2, [R5],a
+       ADD    R3,    $labela_2,  31    ;ads dsds
+
+       DD  5  DUP  11     ; adf
+
+       SUB R1, R1,#34 ; asdasd
+
+       				JZ R0, $x ; asd
+.data
+a: DD a
+ORG 0x20
+.text
+LOAD R1, a    ; ucitava sadrzaj memorijske lokacije a u registar R1
+LOAD R2, #a ; ucitava adresu lokacije a u registar R2
+LOAD R3, $a ; ucitava sadrzaj lokacije a u registar R3 koristeci PC relativno adresiranje
+x: JZ R0, x  ; apsolutni skok na lokaciju x
+JZ R0, $x ; PC relativni skok na lokaciju x
+
+a DEF 4
+
+LOAD R1, [  123 +  a ],a
+
+
+
+
+
+
+
+
+.end 
+
+
+
+asdfasdf
+asdfa
+sfsd
+
