@@ -17,17 +17,17 @@ labela_1: DW 5
   .global a,b,c
 
 
-  		JMP   R1,  R2 
+        JMP   R1,  R2 
 
   LOAD R1, [0x5564]
-		LOAD R2, [R5],a
+        LOAD R2, [R5],a
        ADD    R3,    $labela_2,  31    ;ads dsds
 
        DD  5  DUP  11     ; adf
 
        SUB R1, R1,#34 ; asdasd
 
-       				JZ R0, $x ; asd
+                    JZ R0, $x ; asd
 .data.5
 a: DD a
 ORG 0x20
