@@ -5,69 +5,12 @@
 #include <algorithm>
 #include <vector>
 #include "line.h"
-#include "symbol.h"
+#include "TS_entry.h"
+#include "util.h"
 
 #define LC_START (0)
-#define MNE_CNT (31)
-#define SDW_CNT (18)
 
 using namespace std;
-
-const string mnemonics[MNE_CNT] = {
-                            "INT", "JMP", "CALL", "RET", "JZ", "JNZ", "JGZ", "JGEZ", "JLZ", "JLEZ",
-                            "LOAD", "STORE", "PUSH", "POP", "ADD", "SUB", "MUL", "DIV", "MOD", "AND",
-                            "OR", "XOR", "NOT", "ASL", "ASR", "UBLOAD", "SBLOAD", "UWLOAD", "SWLOAD",
-                            "BSTORE", "WSTORE" 
-                         };
-
-const string system_defined_words[SDW_CNT] = {
-                            "R0","R1","R2","R3","R4","R5","R6","R7","R8","R9","R10","R11","R12","R13","R14",
-                            "R15","SP","PC"
-                        };
-                        // DUP, DEF, ORG?
-
-vector<string> user_defined_words;
-
-// TODO: VECTOR OF USER DEFINED KEY WORDS
-// TODO: CHECK NAME AVAILABILITY FUNCTION
-
-bool is_digits(const string &str)
-{
-     return str.find_first_not_of("0123456789") == std::string::npos;
-}
-
-bool is_alphanum(const string &str){
-     for (size_t i = 0;i<str.length();i++){
-        if (!isalnum(str[i]) && str[i] != '_') return false;
-     }
-     return true;
-}
-
-void strip_off_spaces(string &str){
-
-        while(!str.empty() && isspace(*str.begin()))
-            str.erase(str.begin());
-
-        while(!str.empty() && isspace(*str.rbegin()))
-            str.erase(str.length()-1);
-}
-
-bool is_mnemonic(const string &str){
-    for (int i=0;i<MNE_CNT;i++){
-        if (mnemonics[i]==str) return true;
-    }
-    return false;
-}
-
-bool is_key_word(const string &str){
-    for (int i=0;i<SDW_CNT;i++){
-        if (system_defined_words[i]==str) return true;
-    }
-    for (size_t i=0;i<user_defined_words.size();i++){
-        if (user_defined_words[i] == str) return true;
-    }
-    return false;
-}
 
 int main(){
 
@@ -77,7 +20,6 @@ int main(){
     string label_name;
     bool is_line_labeled;
     int line_counter = 0;
-    int section_id_counter = 0; // mozda visak
     string section_type;
 
     // TODO: int location_counter = LC_START; 
@@ -90,7 +32,6 @@ int main(){
         std::size_t found;
         std::size_t found_comma;
         std::size_t found_space;
-
 
         is_line_labeled = false;
         line_counter++;
@@ -119,15 +60,14 @@ int main(){
 
             // TODO: LABEL_NAME MUST NOT BE ANY OF THE RESERVED WORDS
 
-            if (!is_alphanum(label_name) || is_key_word(label_name)){
+            if (!is_alphanum(label_name) || TS_entry::is_key_word(label_name)){
                 cout << "Line: " << line_counter << ". Illegal label definition." << endl;
                 exit(1);
             }
 
             is_line_labeled = true;
 
-            user_defined_words.push_back(label_name);
-            new Symbol(label_name, line_counter);
+            //new Symbol(label_name, line_counter, nullptr);
 
             // strip off label and spaces
             line.erase(0,found+1);
@@ -153,39 +93,27 @@ int main(){
                 continue;
             }
 
-            // parse section name out of line
-            string section_name;
             found = line.find('.',1);
-            if (found != string::npos) section_name = line.substr(1, found -1);
+            if (found != string::npos) section_type = line.substr(1, found -1);
             else{
-                section_name = line;
-                section_name.erase(section_name.begin());
+                section_type = line;
+                section_type.erase(section_type.begin());
             }
 
             // error?
             if (
-                (section_name != "data" && section_name != "text" && section_name != "rodata" && section_name != "bss") || 
-                (found != string::npos && !is_digits(line.substr(found+1, string::npos))) || (is_key_word(line))
+                (section_type != "data" && section_type != "text" && section_type != "rodata" && section_type != "bss") || 
+                (found != string::npos && !is_digits(line.substr(found+1, string::npos))) || (TS_entry::is_key_word(line))
                 )
             {
                 cout << "Line: " << line_counter << ". Illegal section definition." << endl;
                 exit(1);
             }
 
-            section_type = section_name;
-
-            section_id_counter++;
-
-            user_defined_words.push_back(line);
-            new Symbol(line, line_counter);
+            //new Section(line, line_counter);
             // TODO: PUT LINE IN LINE LIST
 
             continue;
-        }
-
-        if (section_type.empty()){
-            cout << "Line: " << line_counter << ". Not in section." << endl;
-            exit(1);
         }
 
         // check if line is a DEF directive
@@ -196,7 +124,7 @@ int main(){
 
             // TODO: SYMBOL_NAME MUST NOT BE ANY OF THE RESERVED WORDS
 
-            if (!is_alphanum(symbol_name) || is_key_word(symbol_name)){
+            if (!is_alphanum(symbol_name) || TS_entry::is_key_word(symbol_name)){
                 cout << "Line: " << line_counter << ". Illegal constant definition." << endl;
                 exit(1);
             }
@@ -315,7 +243,9 @@ int main(){
 
     cout << "#LINES:" << line_counter << "." << endl << endl;
 
-    Symbol::printAll();
+    cout << "NUM: " << str_to_int("0X01") << endl;
+
+    //Symbol::printAll();
 
     return 0;
 }
