@@ -45,8 +45,8 @@ public:
 
     std::string getName();
 
-    // called after first pass
-    void setIDs();
+    // called after first assembly pass
+    static void setIDs();
 
 protected:
     TS_entry* next;
@@ -54,6 +54,7 @@ protected:
 
     friend class Symbol;
     friend class Section;
+    friend class CodeLine;
 };
 
 class Section: public TS_entry{
@@ -62,15 +63,17 @@ private:
     size_t start;
     static Section* head;
     static Section* tail;
+    static int num_of_sections;
 
 public:
     static Section* current;
+    unsigned short flags;
     Section(std::string name); // set type
     void setSize(size_t size);
     size_t getSize();
-    void add_section(std::string name, int location_cntr, std::string type);
+    static void add_section(std::string name, int location_cntr, std::string type);
+    static void print();
 
-protected:
     void setStart(size_t start);
     size_t getStart();
 
@@ -90,9 +93,10 @@ public:
     Section* getSection();
     int getValue();
 
-    void add_symbol_as_global(std::string name, int value, Section* section);
-    void add_symbol_as_defined(std::string name, int value, Section* section, 
+    static void add_symbol_as_global(std::string name, int value, Section* section);
+    static bool add_symbol_as_defined(std::string name, int value, Section* section, 
                         unsigned short type);
+    static void print();
 
     friend class TS_entry;
 };

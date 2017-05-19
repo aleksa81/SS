@@ -1,9 +1,6 @@
 #include <iostream>
 #include <string>
-#include <stdio.h>
 #include <fstream>
-#include <algorithm>
-#include <vector>
 #include "line.h"
 #include "TS_entry.h"
 #include "util.h"
@@ -18,11 +15,12 @@ int main(){
 
     string line;
     string label_name;
-    bool is_line_labeled;
     int line_counter = 0;
     string section_type;
+    bool ORG_FLAG = false;
+    int ORG_VALUE = 0;
 
-    // TODO: int location_counter = LC_START; 
+    int location_counter = LC_START; 
 
     // reset stream 
     infile.clear();
@@ -33,27 +31,14 @@ int main(){
         std::size_t found_comma;
         std::size_t found_space;
 
-        is_line_labeled = false;
         line_counter++;
+        label_name = "";
 
-        // strip off spaces at the beginning of the line
-        while(!line.empty() && isspace(*line.begin()))
-            line.erase(line.begin());
-
-        // strip off comment before spaces 
-        found = line.find(';');
-        if (found != string::npos){
-            line.erase(found, string::npos);
-        }
-
-        // strip off space at the end of the line
-        while(!line.empty() && isspace(*line.rbegin()))
-            line.erase(line.length()-1);
-
-        // is it's empty line skip parsing
+        strip_off_comment(line);
+        strip_off_spaces(line);
         if (line.empty()) continue;
         
-        // check if line is labeled
+        // LABEL
         found = line.find(":");
         if (found != string::npos){
             label_name = line.substr(0, found);
@@ -65,20 +50,25 @@ int main(){
                 exit(1);
             }
 
-            is_line_labeled = true;
-
-            //new Symbol(label_name, line_counter, nullptr);
+            bool ok = Symbol::add_symbol_as_defined(label_name, location_counter, Section::current, SYMBOL_LABEL);
+            if (!ok){
+                cout << "Line: " << line_counter << ". Symbol redefinition." << endl;
+                exit(1);
+            }
 
             // strip off label and spaces
             line.erase(0,found+1);
             strip_off_spaces(line);
         }
 
-        // check if line is a section definition
+        // END / GLOBAL / SECTION
         if (*line.begin()=='.'){
 
             // if it's end of file, break the loop
-            if (line.substr(1,3) == "end") break;
+            if (line.substr(1,3) == "end") {
+                Section::current->setSize(location_counter);
+                break;
+            }
 
             if (line.substr(1,6) == "global"){
                 found_space = line.find(" ");
@@ -88,7 +78,22 @@ int main(){
                 }
                 string globals = line.substr(found_space+1, string::npos);
 
-                // TODO: PUT LINE IN LINE LIST
+                strip_off_spaces(globals);
+
+                //cout << globals << endl;
+
+                while (true){
+                    found_comma = globals.find(",");
+                    string g_symbol = globals.substr(0, found_comma);
+                    strip_off_spaces(g_symbol);
+                    globals.erase(0, found_comma+1);
+                    Symbol::add_symbol_as_global(g_symbol, 0, nullptr);
+                    //cout << g_symbol << " ";
+                    if (found_comma == string::npos) break;
+                }
+                //cout << endl;
+
+                new CodeLine(label_name, line, "","","", 0, false);
 
                 continue;
             }
@@ -110,19 +115,28 @@ int main(){
                 exit(1);
             }
 
-            //new Section(line, line_counter);
-            // TODO: PUT LINE IN LINE LIST
+            Section::add_section(line, location_counter, section_type);
+            location_counter = LC_START;
+            if (ORG_FLAG == true){
+                Section::current->setStart(ORG_VALUE);
+                ORG_FLAG = false;
+            }
+            
+            new CodeLine(label_name, line, "","","", 0, true);
 
             continue;
         }
 
-        // check if line is a DEF directive
+        if (ORG_FLAG == true){
+            cout << "Line: " << line_counter << ". No section definition after ORG." << endl;
+            exit(1);
+        }
+
+        // DEF
         found = line.find(" DEF ");
         if (found != string::npos){
             found_space = line.find(" ");
             string symbol_name = line.substr(0, found_space);
-
-            // TODO: SYMBOL_NAME MUST NOT BE ANY OF THE RESERVED WORDS
 
             if (!is_alphanum(symbol_name) || TS_entry::is_key_word(symbol_name)){
                 cout << "Line: " << line_counter << ". Illegal constant definition." << endl;
@@ -132,32 +146,46 @@ int main(){
 
             strip_off_spaces(symbol_value);
 
-            // cout << "DEF" << endl;
-            // cout << "name:" << symbol_name << "*" << endl;
-            // cout << "value:" << symbol_value << "*" << endl;
-            // cout << endl;
+            // TODO: constant expression
+            if (!is_absolute(symbol_value)){
+                cout << "Line: " << line_counter << ". DEF must have an absolute argument." << endl;
+                exit(1);
+            }
 
-            // TODO: PUT CONSTANT IN SYMBOL TABLE
-            // TODO: PUT LINE IN LINE LIST
+            bool ok = Symbol::add_symbol_as_defined(symbol_name, str_to_int(symbol_value), Section::current, SYMBOL_CONSTANT);
+            if (!ok){
+                cout << "Line: " << line_counter << ". Symbol redefinition." << endl;
+                exit(1);
+            }
+
+            new CodeLine(label_name, "DEF", symbol_name, symbol_value, "", 0, false);
+
             continue;
         }
 
-        // check if line is an ORG directive
+        // ORG
         if (line.substr(0,4) == "ORG "){
-            // TODO: ASSIGN NEW VALUE TO LC
-            // TODO: PUT LINE IN LINE LIST
-            // TODO: NEXT LINE MUST BE SECTION
+            string value = line.substr(4, string::npos);
+            strip_off_spaces(value);
+            if (!is_absolute(value)){
+                cout << "Line: " << line_counter << ". ORG must have an absolute argument." << endl;
+                exit(1);
+            }
+            ORG_VALUE = str_to_int(value);
+            ORG_FLAG = true;
+
+            new CodeLine(label_name, "ORG", value, "", "", 0, false);
             continue;
         }
 
-        // check if line is defining data
+        // DD
         if ((line[0] == 'D') && 
             (line[1]=='B' || line[1]=='W' || line[1]=='D') &&
             (line[2] == ' ') 
             ){
 
             string data_value = "";
-            string data_rept = "";
+            string data_rept = "1";
 
             found = line.find(" DUP ");
             if (found != string::npos){
@@ -169,14 +197,21 @@ int main(){
             strip_off_spaces(data_value);
             strip_off_spaces(data_rept);
 
-            // cout << "DD" << endl;
-            // cout << "value:" << data_value << "*" << endl;
-            // cout << "rept:" << data_rept << "*" << endl;
-            // cout << endl;
+            // TODO: constant expression
+            if (!is_absolute(data_rept) || !is_absolute(data_value)){
+                cout << "Line: " << line_counter << ". Ds must have absolute arguments." << endl;
+                exit(1);
+            }
 
-            // TODO: ASSIGN NEW VALUE TO LC
-            // TODO: PUT LINE IN LINE LIST
-            // TODO: WRITE TO OBJECT FILE?
+            int data_size;
+            int data_irept = str_to_int(data_rept);
+            if (line[1] == 'B') data_size = 1;
+            else if (line[1] == 'W') data_size = 2;
+            else data_size = 4;
+
+            location_counter += data_irept * data_size;
+
+            new CodeLine(label_name, line.substr(0,2), data_rept, "DUP", data_value, data_irept * data_size, false);
 
             continue;
         }
@@ -225,15 +260,15 @@ int main(){
                 exit(1);
             }
 
-            // for (int i=0;i<3;i++){
-            //  cout << " *" << ops[i] << "* ";
-            // }
-            // cout << endl;
+            int instr_size = get_instruction_size(mnemonic, ops[0], ops[1], ops[2]);
+            if (instr_size == 0){
+                cout << "Line: " << line_counter << ". Arguments number mismatch." << endl;
+                exit(1);
+            }
+
+            location_counter += instr_size;
         
-            // TODO: ASSIGN NEW VALUE TO LC
-            // TODO: PUT LINE IN LINE LIST
-            // TODO: CHECK OPS FOR ERRORS, IN SECOND PASS?
-            
+            new CodeLine(label_name, mnemonic, ops[0], ops[1], ops[2], instr_size, false);
             continue;
         }
 
@@ -243,9 +278,12 @@ int main(){
 
     cout << "#LINES:" << line_counter << "." << endl << endl;
 
-    cout << "NUM: " << str_to_int("0X01") << endl;
+    TS_entry::setIDs();
 
-    //Symbol::printAll();
+    CodeLine::print();
+
+    Section::print();
+    Symbol::print();
 
     return 0;
 }

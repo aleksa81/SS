@@ -4,6 +4,7 @@ Section* Section::head = nullptr;
 Section* Section::tail = nullptr;
 
 Section* Section::current = nullptr;
+int Section::num_of_sections = 0;
 
 Symbol* Symbol::head = nullptr;
 Symbol* Symbol::tail = nullptr;
@@ -51,11 +52,14 @@ unsigned short TS_entry::getType(){
 }
 
 void TS_entry::setIDs(){
+
+	// sets IDs to all symbol table entries
 	unsigned int ID = 0;
 
 	// assign IDs to sections 
 	for (TS_entry* i = Section::head; i != nullptr;i = i->next){
 		i->setID(++ID);
+		Section::num_of_sections++;
 	}
 
 	// assign IDs to symbols 
@@ -65,9 +69,8 @@ void TS_entry::setIDs(){
 }
 
 bool TS_entry::is_key_word(const std::string &str){
-    if (TS_entry::system_defined_words.find(str) == TS_entry::system_defined_words.end() &&
-    	TS_entry::TS_entry_mapping.find(str) == TS_entry::TS_entry_mapping.end())
-    return false;
+    if (TS_entry::system_defined_words.find(str) == TS_entry::system_defined_words.end()) 
+    	return false;
 	return true;
 }
 
@@ -94,12 +97,23 @@ size_t Section::getSize(){
 
 void Section::add_section(std::string name, int location_cntr, std::string type){
 	Section* section = new Section(name);
-	if (type == "data") this->type = SECTION_DATA;
-	else if (type == "text") this->type = SECTION_TEXT;
-	else if (type == "rodata") this->type = SECTION_RODATA;
-	else if (type == "bss") this->type = SECTION_BSS;
-	if (Section::current != nullptr) current->size = location_cntr;
-	Section::current = this;
+
+	if (type == "data") 
+		section->type = SECTION_DATA;
+	
+	else if (type == "text") 
+		section->type = SECTION_TEXT;
+	
+	else if (type == "rodata") 
+		section->type = SECTION_RODATA;
+	
+	else if (type == "bss") 
+		section->type = SECTION_BSS;
+	
+	if (Section::current != nullptr) 
+		current->size = location_cntr;
+
+	Section::current = section;
 }
 
 void Section::setStart(size_t start){
@@ -144,16 +158,45 @@ void Symbol::add_symbol_as_global(std::string name, int value, Section* section)
 	TS_entry::TS_entry_mapping[name]->setScope(SCOPE_GLOBAL);
 }
 
-void Symbol::add_symbol_as_defined(std::string name, int value, Section* section, unsigned short type){
+bool Symbol::add_symbol_as_defined(std::string name, int value, Section* section, unsigned short type){
 	Symbol* symbol;
 	if (TS_entry::TS_entry_mapping.find(name) == TS_entry::TS_entry_mapping.end()){
-		new Symbol(name, value, section);
+		symbol = new Symbol(name, value, section);
 	}else{
 
+		if (TS_entry::TS_entry_mapping[name]->getType() != SYMBOL_EXTERN){
+			// returns false for redefinition
+			return false;
+		}
 		// if symbol was declared global before definition
 		symbol = (Symbol*)TS_entry::TS_entry_mapping[name];
 		symbol->value = value; //
 		symbol->section = section;
 	}
 	symbol->type = type;
+
+	return true;
+}
+
+void Section::print(){
+	std::cout << std::endl;
+	for (Section* i = Section::head; i != nullptr; i = (Section*)i->next){
+		std::cout << "SEG " << i->ID << " " << i->name << "  "
+				  << i->ID << " " << i->start << " " << i->size << " " << "FLAGS";
+		std::cout << std::endl;
+	}
+}
+
+void Symbol::print(){
+	std::cout << std::endl;
+	for (Symbol* i = Symbol::head; i != nullptr; i = (Symbol*)i->next){
+		std::cout << "SYM " << i->ID << " " << i->name << "  ";
+		if (i->type == SYMBOL_EXTERN) std::cout << 0;
+		else if (i->type == SYMBOL_CONSTANT) std::cout << -1;
+		else std::cout << i->section->getID();
+		std::cout << " " << i->value << " ";
+		if (i->scope_flag == SCOPE_GLOBAL) std::cout << "G";
+		if (i->scope_flag == SCOPE_LOCAL) std::cout << "L";
+		std::cout << std::endl;
+	}
 }

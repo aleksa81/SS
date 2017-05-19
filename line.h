@@ -3,17 +3,17 @@
 
 #include <map>
 #include <string>
+#include <iostream>
+#include "TS_entry.h"
 
 class CodeLine{
 private:
     std::string label; //
     std::string mnemonic; //
-    std::string op1; //
-    std::string op2; //
-    std::string op3; //
+    std::string ops[3];
+    Section* section; //
     size_t size;
-    int section; //
-    bool isLabeled; // 
+    bool is_section;
 
     CodeLine* next;
     CodeLine* prev;
@@ -21,16 +21,30 @@ private:
     static CodeLine* head;
     static CodeLine* tail;
 public:
-    CodeLine(std::string mnemonic, int section){
-        this->mnemonic = mnemonic;
-        this->section = section;
+    CodeLine(std::string label, 
+             std::string mnemonic, 
+             std::string op1,
+             std::string op2,
+             std::string op3, 
+             size_t size,
+             bool is_section){
 
-        // TODO: set size
+        this->label = label;
+        this->mnemonic = mnemonic;
+        this->section = Section::current;
+        ops[0] = op1;
+        ops[1] = op2;
+        ops[2] = op3; 
+        this->size = size;
+
+        this->is_section = is_section;
 
         this->next = nullptr;
         this->prev = nullptr;
 
-        if (head == nullptr) head = tail = this;
+        if (head == nullptr) {
+            head = tail = this;
+        }
         else{
             tail->next = this;
             this->prev = tail;
@@ -38,19 +52,21 @@ public:
         }
     }
 
-    void setLabel(std::string label){
-        this-> label = label;
-        this->isLabeled = true;
-    }
-
-    void setOps(std::string op1, std::string op2 = "", std::string op3 = ""){
-        this->op1 = op1;
-        this->op2 = op2;
-        this->op3 = op3;
-    }
-
     size_t getSize(){
         return this->size;
+    }
+
+    static void print(){
+        for (CodeLine* i = head; i != nullptr; i=i->next){
+            if (!i->label.empty()) std::cout << i->label << ": ";
+            std::cout << i->mnemonic << " ";
+            for (int j=0;j<3;j++){
+                if (!i->ops[j].empty()) std::cout << i->ops[j] << " ";
+            }
+            if (i->size != 0) std::cout << "[ size = " << i->size << "]";
+            if (i->is_section == true) std::cout << "[ size = " << ((Section*)TS_entry::TS_entry_mapping[i->mnemonic])->getSize() << "]";
+            std::cout << std::endl;
+        }
     }
 };
 

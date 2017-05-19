@@ -1,6 +1,4 @@
-     .global a, b, c
-     .global g,h,j
-
+    
      .data.4                                 
 
 labela_1: DW 5              
@@ -14,13 +12,12 @@ labela_1: DW 5
 
   .data.6
 
-  .global a,b,c
 
 
-        JMP   R1,  R2 
+     L:   JMP   R1
 
   LOAD R1, [0x5564]
-        LOAD R2, [R5],a
+        LOAD R2, [R5]
        ADD    R3,    $labela_2,  31    ;ads dsds
 
        DD  5  DUP  11     ; adf
@@ -29,7 +26,7 @@ labela_1: DW 5
 
                     JZ R0, $x ; asd
 .data.5
-a: DD a
+a: DD 2
 ORG 0x20
 .text
 LOAD R1, a    ; ucitava sadrzaj memorijske lokacije a u registar R1
@@ -40,7 +37,7 @@ JZ R0, $x ; PC relativni skok na lokaciju x
 
 b DEF 4
 
-LOAD R1, [  123 +  a ],a
+LOAD R1, [  123 +  a ]
 
 
 
