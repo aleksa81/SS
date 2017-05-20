@@ -6,7 +6,7 @@
 #include <iostream>
 #include "TS_entry.h"
 
-class CodeLine{
+class Line{
 private:
     std::string label; //
     std::string mnemonic; //
@@ -15,19 +15,19 @@ private:
     size_t size;
     bool is_section;
 
-    CodeLine* next;
-    CodeLine* prev;
+    Line* next;
+    Line* prev;
 
-    static CodeLine* head;
-    static CodeLine* tail;
+    static Line* head;
+    static Line* tail;
 public:
-    CodeLine(std::string label, 
-             std::string mnemonic, 
-             std::string op1,
-             std::string op2,
-             std::string op3, 
-             size_t size,
-             bool is_section){
+    Line(std::string label, 
+         std::string mnemonic, 
+         std::string op1,
+         std::string op2,
+         std::string op3, 
+         size_t size,
+         bool is_section){
 
         this->label = label;
         this->mnemonic = mnemonic;
@@ -57,16 +57,17 @@ public:
     }
 
     static void print(){
-        for (CodeLine* i = head; i != nullptr; i=i->next){
+        for (Line* i = head; i != nullptr; i=i->next){
             if (!i->label.empty()) std::cout << i->label << ": ";
             std::cout << i->mnemonic << " ";
             for (int j=0;j<3;j++){
                 if (!i->ops[j].empty()) std::cout << i->ops[j] << " ";
             }
             if (i->size != 0) std::cout << "[ size = " << i->size << "]";
-            if (i->is_section == true) std::cout << "[ size = " << ((Section*)TS_entry::TS_entry_mapping[i->mnemonic])->getSize() << "]";
+            if (i->is_section == true) std::cout << "[size = " << ((Section*)TS_entry::TS_entry_mapping[i->mnemonic])->getSize() << "]";
             std::cout << std::endl;
         }
+        std::cout << std::endl;
     }
 };
 

@@ -166,3 +166,15 @@ size_t get_instruction_size(const std::string &mne,
 	}
 	return 64;
 }
+
+std::string right_padding(const std::string &str, const size_t size){
+	std::string s = str;
+	while(s.length() < size) s+=' ';
+	return s;
+}
+
+std::string left_padding(const std::string &str, const size_t size){
+	std::string s = str;
+	s.insert(s.begin(), size-s.length(), ' ');
+	return s;
+}

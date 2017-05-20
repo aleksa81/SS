@@ -56,4 +56,8 @@ size_t get_instruction_size(const std::string &mne,
 						 const std::string &op2,
 						 const std::string &op3);
 
+std::string right_padding(const std::string &str, const size_t size);
+
+std::string left_padding(const std::string &str, const size_t size);
+
 #endif

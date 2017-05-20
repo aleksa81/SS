@@ -1,4 +1,4 @@
 #include "line.h"
 
-CodeLine* CodeLine::head = nullptr;
-CodeLine* CodeLine::tail = nullptr;
+Line* Line::head = nullptr;
+Line* Line::tail = nullptr;

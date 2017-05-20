@@ -30,9 +30,7 @@ private:
     static const std::set<std::string> system_defined_words;
 
 public:
-    static bool is_key_word(const std::string &str);
-
-    TS_entry(std::string name); // add to list
+    TS_entry(std::string name);
 
     void setID(unsigned int ID);
     unsigned int getID();
@@ -45,8 +43,13 @@ public:
 
     std::string getName();
 
-    // called after first assembly pass
-    static void setIDs();
+    static bool is_key_word(const std::string &str);
+    static void print();
+    static void init();
+
+    virtual std::string to_string(){
+        return "TS_entry";
+    }
 
 protected:
     TS_entry* next;
@@ -54,28 +57,32 @@ protected:
 
     friend class Symbol;
     friend class Section;
-    friend class CodeLine;
+    friend class Line;
 };
 
 class Section: public TS_entry{
 private:
     size_t size;
     size_t start;
-    static Section* head;
-    static Section* tail;
+    static TS_entry* head;
+    static TS_entry* tail;
     static int num_of_sections;
 
 public:
     static Section* current;
     unsigned short flags;
-    Section(std::string name); // set type
+
+    Section(std::string name);
+
     void setSize(size_t size);
     size_t getSize();
-    static void add_section(std::string name, int location_cntr, std::string type);
-    static void print();
 
     void setStart(size_t start);
     size_t getStart();
+
+    static void add_section(std::string name, int location_cntr, std::string type);
+
+    virtual std::string to_string() override;
 
     friend class TS_entry;
 };
@@ -84,8 +91,8 @@ class Symbol: public TS_entry{
 private:
     int value;
     Section* section;
-    static Symbol* head;
-    static Symbol* tail;
+    static TS_entry* head;
+    static TS_entry* tail;
 
 public:
     Symbol(std::string name, int value, Section* section);
@@ -93,10 +100,10 @@ public:
     Section* getSection();
     int getValue();
 
-    static void add_symbol_as_global(std::string name, int value, Section* section);
-    static bool add_symbol_as_defined(std::string name, int value, Section* section, 
-                        unsigned short type);
-    static void print();
+    static void add_symbol_as_global(std::string name, int value);
+    static bool add_symbol_as_defined(std::string name, int value, unsigned short type);
+
+    virtual std::string to_string() override;
 
     friend class TS_entry;
 };

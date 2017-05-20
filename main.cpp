@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <iomanip>
 #include "line.h"
 #include "TS_entry.h"
 #include "util.h"
@@ -50,7 +51,7 @@ int main(){
                 exit(1);
             }
 
-            bool ok = Symbol::add_symbol_as_defined(label_name, location_counter, Section::current, SYMBOL_LABEL);
+            bool ok = Symbol::add_symbol_as_defined(label_name, location_counter, SYMBOL_LABEL);
             if (!ok){
                 cout << "Line: " << line_counter << ". Symbol redefinition." << endl;
                 exit(1);
@@ -87,13 +88,13 @@ int main(){
                     string g_symbol = globals.substr(0, found_comma);
                     strip_off_spaces(g_symbol);
                     globals.erase(0, found_comma+1);
-                    Symbol::add_symbol_as_global(g_symbol, 0, nullptr);
+                    Symbol::add_symbol_as_global(g_symbol, 0);
                     //cout << g_symbol << " ";
                     if (found_comma == string::npos) break;
                 }
                 //cout << endl;
 
-                new CodeLine(label_name, line, "","","", 0, false);
+                new Line(label_name, line, "","","", 0, false);
 
                 continue;
             }
@@ -122,7 +123,7 @@ int main(){
                 ORG_FLAG = false;
             }
             
-            new CodeLine(label_name, line, "","","", 0, true);
+            new Line(label_name, line, "","","", 0, true);
 
             continue;
         }
@@ -152,13 +153,13 @@ int main(){
                 exit(1);
             }
 
-            bool ok = Symbol::add_symbol_as_defined(symbol_name, str_to_int(symbol_value), Section::current, SYMBOL_CONSTANT);
+            bool ok = Symbol::add_symbol_as_defined(symbol_name, str_to_int(symbol_value), SYMBOL_CONSTANT);
             if (!ok){
                 cout << "Line: " << line_counter << ". Symbol redefinition." << endl;
                 exit(1);
             }
 
-            new CodeLine(label_name, "DEF", symbol_name, symbol_value, "", 0, false);
+            new Line(label_name, "DEF", symbol_name, symbol_value, "", 0, false);
 
             continue;
         }
@@ -174,7 +175,7 @@ int main(){
             ORG_VALUE = str_to_int(value);
             ORG_FLAG = true;
 
-            new CodeLine(label_name, "ORG", value, "", "", 0, false);
+            new Line(label_name, "ORG", value, "", "", 0, false);
             continue;
         }
 
@@ -211,7 +212,7 @@ int main(){
 
             location_counter += data_irept * data_size;
 
-            new CodeLine(label_name, line.substr(0,2), data_rept, "DUP", data_value, data_irept * data_size, false);
+            new Line(label_name, line.substr(0,2), data_rept, "DUP", data_value, data_irept * data_size, false);
 
             continue;
         }
@@ -268,7 +269,7 @@ int main(){
 
             location_counter += instr_size;
         
-            new CodeLine(label_name, mnemonic, ops[0], ops[1], ops[2], instr_size, false);
+            new Line(label_name, mnemonic, ops[0], ops[1], ops[2], instr_size, false);
             continue;
         }
 
@@ -278,12 +279,12 @@ int main(){
 
     cout << "#LINES:" << line_counter << "." << endl << endl;
 
-    TS_entry::setIDs();
 
-    CodeLine::print();
+    TS_entry::init();
 
-    Section::print();
-    Symbol::print();
+    Line::print();
+    
+    TS_entry::print();
 
     return 0;
 }

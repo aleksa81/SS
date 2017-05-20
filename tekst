@@ -1,5 +1,5 @@
     
-     .data.4                                 
+     .data.4                        
 
 labela_1: DW 5              
 
@@ -9,9 +9,11 @@ labela_1: DW 5
 
       aasd_a    DEF 561  ; asd
 
+  k DEF 8
 
   .data.6
 
+  .global a,x,k, e
 
 
      L:   JMP   R1
@@ -42,7 +44,7 @@ LOAD R1, [  123 +  a ]
 
 
 
-
+.bss
 
 
 

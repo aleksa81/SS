@@ -1,13 +1,17 @@
 #include "TS_entry.h"
+#include "util.h"
 
-Section* Section::head = nullptr;
-Section* Section::tail = nullptr;
+#define MAX_SEG_NAME_LEN (12)
+#define MAX_SYM_NAME_LEN (15)
+
+TS_entry* Section::head = nullptr;
+TS_entry* Section::tail = nullptr;
 
 Section* Section::current = nullptr;
 int Section::num_of_sections = 0;
 
-Symbol* Symbol::head = nullptr;
-Symbol* Symbol::tail = nullptr;
+TS_entry* Symbol::head = nullptr;
+TS_entry* Symbol::tail = nullptr;
 
 std::unordered_map<std::string, TS_entry*> TS_entry::TS_entry_mapping;
 
@@ -51,7 +55,7 @@ unsigned short TS_entry::getType(){
   	return this->type;
 }
 
-void TS_entry::setIDs(){
+void TS_entry::init(){
 
 	// sets IDs to all symbol table entries
 	unsigned int ID = 0;
@@ -148,20 +152,20 @@ int Symbol::getValue(){
 	return this->value;
 }
 
-void Symbol::add_symbol_as_global(std::string name, int value, Section* section){
+void Symbol::add_symbol_as_global(std::string name, int value){
 	if (TS_entry::TS_entry_mapping.find(name) == TS_entry::TS_entry_mapping.end()){
 
 		// if global is hit before definition
-		Symbol* symbol = new Symbol(name, value, section);
+		Symbol* symbol = new Symbol(name, value, nullptr);
 		symbol->setType(SYMBOL_EXTERN);
 	}
 	TS_entry::TS_entry_mapping[name]->setScope(SCOPE_GLOBAL);
 }
 
-bool Symbol::add_symbol_as_defined(std::string name, int value, Section* section, unsigned short type){
+bool Symbol::add_symbol_as_defined(std::string name, int value, unsigned short type){
 	Symbol* symbol;
 	if (TS_entry::TS_entry_mapping.find(name) == TS_entry::TS_entry_mapping.end()){
-		symbol = new Symbol(name, value, section);
+		symbol = new Symbol(name, value, Section::current);
 	}else{
 
 		if (TS_entry::TS_entry_mapping[name]->getType() != SYMBOL_EXTERN){
@@ -170,33 +174,60 @@ bool Symbol::add_symbol_as_defined(std::string name, int value, Section* section
 		}
 		// if symbol was declared global before definition
 		symbol = (Symbol*)TS_entry::TS_entry_mapping[name];
-		symbol->value = value; //
-		symbol->section = section;
+		symbol->value = value; 
+		symbol->section = Section::current;
 	}
 	symbol->type = type;
 
 	return true;
 }
 
-void Section::print(){
-	std::cout << std::endl;
-	for (Section* i = Section::head; i != nullptr; i = (Section*)i->next){
-		std::cout << "SEG " << i->ID << " " << i->name << "  "
-				  << i->ID << " " << i->start << " " << i->size << " " << "FLAGS";
-		std::cout << std::endl;
-	}
+std::string Section::to_string(){
+	std::string flags;
+	if (this->type == SECTION_DATA) flags = "WPA";
+	else if (this->type == SECTION_RODATA) flags = "RPA";
+	else if (this->type == SECTION_TEXT) flags = "XPA";
+	else flags = "W-A";
+
+	return right_padding("SEG", 4) +
+		   left_padding(std::to_string(this->ID), 4) + 
+		   " " +
+		   right_padding(this->name, MAX_SEG_NAME_LEN) +
+		   left_padding(std::to_string(this->ID), 4) +
+		   left_padding(std::to_string(this->start), 7) +
+		   left_padding(std::to_string(this->size), 7) +
+		   " " +
+		   flags;
 }
 
-void Symbol::print(){
+std::string Symbol::to_string(){
+	std::string my_section;
+	if (this->type == SYMBOL_EXTERN) my_section = "0";
+	else if (this->type == SYMBOL_CONSTANT) my_section = "-1";
+	else my_section = std::to_string(this->section->ID);
+
+	std::string scope;
+	if (this->scope_flag == SCOPE_GLOBAL) scope = "G";
+	else scope = "L";
+
+	return right_padding("SYM", 4) +
+		   left_padding(std::to_string(this->ID), 4) + 
+		   " " +
+		   right_padding(this->name, MAX_SYM_NAME_LEN) +
+		   left_padding(my_section, 4) +
+		   left_padding(std::to_string(this->value), 7) +
+		   " " +
+		   scope;
+}
+
+void TS_entry::print(){
+	for (TS_entry* i = Section::head; i != nullptr; i = i->next){
+		std::cout << i->to_string() << std::endl;
+	}
 	std::cout << std::endl;
-	for (Symbol* i = Symbol::head; i != nullptr; i = (Symbol*)i->next){
-		std::cout << "SYM " << i->ID << " " << i->name << "  ";
-		if (i->type == SYMBOL_EXTERN) std::cout << 0;
-		else if (i->type == SYMBOL_CONSTANT) std::cout << -1;
-		else std::cout << i->section->getID();
-		std::cout << " " << i->value << " ";
-		if (i->scope_flag == SCOPE_GLOBAL) std::cout << "G";
-		if (i->scope_flag == SCOPE_LOCAL) std::cout << "L";
-		std::cout << std::endl;
+	std::cout << "Number of sections:" << Section::num_of_sections << std::endl;
+	std::cout << std::endl;
+	for (TS_entry* i = Symbol::head; i != nullptr; i = i->next){
+		std::cout << i->to_string() << std::endl;
 	}
 }
