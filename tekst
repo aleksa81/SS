@@ -11,6 +11,7 @@ labela_1: DW 5
 
   k DEF 8
 
+
   .data.6
 
   .global a,x,k, e
@@ -27,6 +28,7 @@ labela_1: DW 5
        SUB R1, R1,#34 ; asdasd
 
                     JZ R0, $x ; asd
+
 .data.5
 a: DD 2
 ORG 0x20
@@ -42,7 +44,7 @@ b DEF 4
 LOAD R1, [  123 +  a ]
 
 
-
+.rodata.1
 
 .bss
 
