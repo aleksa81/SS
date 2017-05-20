@@ -41,8 +41,6 @@ void Parser::parse(std::string file_name){
     }
 
     TS_entry::init();
-    Line::print();
-    TS_entry::print();
 }
 
 void Parser::get_label(std::string &line){

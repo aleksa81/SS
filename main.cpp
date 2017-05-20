@@ -10,5 +10,8 @@ int main(){
 
     Parser::getInstance().parse("tekst");
 
+    Line::print();
+    TS_entry::print();
+
     return 0;
 }
