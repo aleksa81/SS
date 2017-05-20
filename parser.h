@@ -7,48 +7,48 @@
 
 class Parser{
 private:
-	static std::string label_name;
-	static int line_counter; 
-	static int location_counter; 
+    static std::string label_name;
+    static int line_counter; 
+    static int location_counter; 
 
-	static int ORG_VALUE;
-	static bool ORG_FLAG;
+    static int ORG_VALUE;
+    static bool ORG_FLAG;
 
-	Parser(){}
+    Parser(){}
 
 public:
 
-	static Parser& getInstance(){
+    static Parser& getInstance(){
 
-		// initialized only once (on first encounter)
-		// deleted when program terminates
-		static Parser instance;
+        // initialized only once (on first encounter)
+        // deleted when program terminates
+        static Parser instance;
 
-		return instance;
-	}
+        return instance;
+    }
 
-	Parser(Parser const&) = delete;
-	void operator=(Parser const&) = delete;
-	// Note: Scott Meyers mentions in his Effective Modern
+    Parser(Parser const&) = delete;
+    void operator=(Parser const&) = delete;
+    // Note: Scott Meyers mentions in his Effective Modern
     //       C++ book, that deleted functions should generally
     //       be public as it results in better error messages
     //       due to the compilers behavior to check accessibility
     //       before deleted status.
 
-	static void get_label(std::string &line);
-	static bool is_end(std::string &line);
-	static bool is_global(std::string &line);
-	static bool is_section(std::string &line);
-	static bool is_definition(std::string &line);
-	static bool is_org(std::string &line);
-	static bool is_data_definition(std::string &line);
-	static bool is_instruction(std::string &line);
+    static void get_label(std::string &line);
+    static bool is_end(std::string &line);
+    static bool is_global(std::string &line);
+    static bool is_section(std::string &line);
+    static bool is_definition(std::string &line);
+    static bool is_org(std::string &line);
+    static bool is_data_definition(std::string &line);
+    static bool is_instruction(std::string &line);
 
-	static void error(std::string body);
+    static void error(std::string body);
 
-	void parse(std::string file_name);
+    void parse(std::string file_name);
 
-	friend class Line;
+    friend class Line;
 
 };
 
