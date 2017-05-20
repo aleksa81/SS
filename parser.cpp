@@ -7,7 +7,7 @@
 
 int Parser::line_counter = 0;
 int Parser::location_counter = 0;
-std::string Parser::label_name = ""; // zbog Line()
+std::string Parser::label_name = "";
 
 int Parser::ORG_VALUE = 0;
 bool Parser::ORG_FLAG = false;
