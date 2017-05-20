@@ -33,7 +33,7 @@ void Parser::parse(std::string file_name){
         if (Parser::is_end(line)) break;
         else if (Parser::is_global(line)) continue;
         else if (Parser::is_section(line)) continue;
-        else if(Parser::is_definition(line)) continue;
+        else if (Parser::is_definition(line)) continue;
         else if (Parser::is_org(line)) continue;
         else if (Parser::is_data_definition(line)) continue;
         else if (Parser::is_instruction(line)) continue;
