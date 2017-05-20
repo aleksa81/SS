@@ -128,9 +128,9 @@ int str_to_int(const std::string &str){
 }
 
 size_t get_instruction_size(const std::string &mne,
-                         const std::string &op1,
-                         const std::string &op2,
-                         const std::string &op3){
+                            const std::string &op1,
+                            const std::string &op2,
+                            const std::string &op3){
     // returns instruction size
     // if the number of operands for given mnemonic is not valid, returns 0
     // address type validity will be checked in second assembly pass
