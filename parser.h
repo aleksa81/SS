@@ -16,6 +16,16 @@ private:
 
     Parser(){}
 
+    static void get_label(std::string &line);
+    static bool is_end(std::string &line);
+    static bool is_global(std::string &line);
+    static bool is_section(std::string &line);
+    static bool is_definition(std::string &line);
+    static bool is_org(std::string &line);
+    static bool is_data_definition(std::string &line);
+    static bool is_instruction(std::string &line);
+    static void error(std::string body);
+
 public:
 
     static Parser& getInstance(){
@@ -34,17 +44,6 @@ public:
     //       be public as it results in better error messages
     //       due to the compilers behavior to check accessibility
     //       before deleted status.
-
-    static void get_label(std::string &line);
-    static bool is_end(std::string &line);
-    static bool is_global(std::string &line);
-    static bool is_section(std::string &line);
-    static bool is_definition(std::string &line);
-    static bool is_org(std::string &line);
-    static bool is_data_definition(std::string &line);
-    static bool is_instruction(std::string &line);
-
-    static void error(std::string body);
 
     void parse(std::string file_name);
 
