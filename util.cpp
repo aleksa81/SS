@@ -28,11 +28,11 @@ bool is_digits(const std::string &str){
 }
 
 bool is_hexadecimals(const std::string &str){
-	return str.find_first_not_of("0123456789abcdefABCDEF") == std::string::npos;
+    return str.find_first_not_of("0123456789abcdefABCDEF") == std::string::npos;
 }
 
 bool is_binaries(const std::string &str){
-	return str.find_first_not_of("01") == std::string::npos;
+    return str.find_first_not_of("01") == std::string::npos;
 }
 
 bool is_alphanum(const std::string &str){
@@ -51,7 +51,7 @@ void strip_off_spaces(std::string &str){
 }
 
 void strip_off_comment(std::string &str){
-	size_t found = str.find(';');
+    size_t found = str.find(';');
     if (found != std::string::npos){
         str.erase(found, std::string::npos);
     }
@@ -59,122 +59,122 @@ void strip_off_comment(std::string &str){
 
 bool is_mnemonic(const std::string &str){
     if (check_first_operand_mnemonics.find(str) == check_first_operand_mnemonics.end() &&
-    	check_second_operand_mnemonics.find(str) == check_second_operand_mnemonics.end() &&
-    	check_no_operand_mnemonics.find(str) == check_no_operand_mnemonics.end()) return false;
+        check_second_operand_mnemonics.find(str) == check_second_operand_mnemonics.end() &&
+        check_no_operand_mnemonics.find(str) == check_no_operand_mnemonics.end()) return false;
     return true;
 }
 
 bool is_reg_dir(const std::string &op){
-	return regs.find(op) != regs.end(); 
+    return regs.find(op) != regs.end(); 
 }
 
 bool is_reg_ind(const std::string &op){
-	size_t found1 = op.find("[");
-	size_t found2 = op.find("]");
-	std::string reg = op.substr(found1+1, found2-found1-1);
-	strip_off_spaces(reg);
-	return regs.find(reg) != regs.end(); 
+    size_t found1 = op.find("[");
+    size_t found2 = op.find("]");
+    std::string reg = op.substr(found1+1, found2-found1-1);
+    strip_off_spaces(reg);
+    return regs.find(reg) != regs.end(); 
 }
 
 bool is_mem_dir(const std::string &op){ // TODO
-	return true;
+    return true;
 } 
 
 bool is_mem_ind(const std::string &op){ // TODO
-	return true;
+    return true;
 }
 
 bool is_pc_rel(const std::string &op){
-	return op[0] == '$' && 
-		   (is_alphanum(op.substr(1, std::string::npos)) || is_absolute(op.substr(1, std::string::npos)));
+    return op[0] == '$' && 
+           (is_alphanum(op.substr(1, std::string::npos)) || is_absolute(op.substr(1, std::string::npos)));
 }
 
 bool is_reg_ind_disp(const std::string &op){ // TODO
-	return true;
+    return true;
 }
 
 bool is_immed(const std::string &op){ // TODO
-	return true;
+    return true;
 }
 
 bool is_binary(const std::string &str){
-	return str[0] == '0' && (str[1] == 'b' || str[1] == 'B') && 
-		   is_binaries(str.substr(2, std::string::npos));
+    return str[0] == '0' && (str[1] == 'b' || str[1] == 'B') && 
+           is_binaries(str.substr(2, std::string::npos));
 }
 
 bool is_hexadecimal(const std::string &str){
-	return str[0] == '0' && (str[1] == 'x' || str[1] == 'X') && 
-		   is_hexadecimals(str.substr(2, std::string::npos));
+    return str[0] == '0' && (str[1] == 'x' || str[1] == 'X') && 
+           is_hexadecimals(str.substr(2, std::string::npos));
 }
 
 bool is_absolute(const std::string &str){
-	return is_digits(str) || is_binary(str) || is_hexadecimal(str);
+    return is_digits(str) || is_binary(str) || is_hexadecimal(str);
 }
 
 bool is_const_expr(const std::string &str){ // TODO
-	return true;
+    return true;
 }
 
 int str_to_int(const std::string &str){
 
-	// c_str() converts string to const char* 
-	if (is_binary(str)) 
-		return strtol(str.substr(2, std::string::npos).c_str(), nullptr, 2);
-	if (is_hexadecimal(str)) 
-		return strtol(str.substr(2, std::string::npos).c_str(), nullptr, 16);
-	if (is_digits(str)) 
-		return strtol(str.c_str(), nullptr, 10);
-	return 0;
+    // c_str() converts string to const char* 
+    if (is_binary(str)) 
+        return strtol(str.substr(2, std::string::npos).c_str(), nullptr, 2);
+    if (is_hexadecimal(str)) 
+        return strtol(str.substr(2, std::string::npos).c_str(), nullptr, 16);
+    if (is_digits(str)) 
+        return strtol(str.c_str(), nullptr, 10);
+    return 0;
 }
 
 size_t get_instruction_size(const std::string &mne,
-						 const std::string &op1,
-						 const std::string &op2,
-						 const std::string &op3){
-	// returns instruction size
-	// if the number of operands for given mnemonic is not valid, returns 0
-	// address type validity will be checked in second assembly pass
+                         const std::string &op1,
+                         const std::string &op2,
+                         const std::string &op3){
+    // returns instruction size
+    // if the number of operands for given mnemonic is not valid, returns 0
+    // address type validity will be checked in second assembly pass
 
-	if (check_first_operand_mnemonics.find(mne) != check_first_operand_mnemonics.end()){
-		if (!op2.empty() || !op3.empty()) return 0;
-		if (is_reg_dir(op1) || is_reg_ind(op1)) return 32;
-	}
-	else if (check_second_operand_mnemonics.find(mne) != check_second_operand_mnemonics.end()){
-		if (!op3.empty()) return 0;
-		if (is_reg_dir(op2) || is_reg_ind(op2)) return 32;
-	}
-	else if(check_no_operand_mnemonics.find(mne) != check_no_operand_mnemonics.end()){
-		if (mne == "RET"){
+    if (check_first_operand_mnemonics.find(mne) != check_first_operand_mnemonics.end()){
+        if (!op2.empty() || !op3.empty()) return 0;
+        if (is_reg_dir(op1) || is_reg_ind(op1)) return 32;
+    }
+    else if (check_second_operand_mnemonics.find(mne) != check_second_operand_mnemonics.end()){
+        if (!op3.empty()) return 0;
+        if (is_reg_dir(op2) || is_reg_ind(op2)) return 32;
+    }
+    else if(check_no_operand_mnemonics.find(mne) != check_no_operand_mnemonics.end()){
+        if (mne == "RET"){
 
-			// RET has no operands
-			if (!op1.empty() || !op2.empty() || !op3.empty()) return 0;
-			return 32;
+            // RET has no operands
+            if (!op1.empty() || !op2.empty() || !op3.empty()) return 0;
+            return 32;
 
-		} 
-		else if ((mne == "PUSH" || mne == "POP")){
+        } 
+        else if ((mne == "PUSH" || mne == "POP")){
 
-			// PUSH and POP have one operand
-			if (!op2.empty() || !op3.empty()) return 0;
-			return 32;
-		}
-		else{
+            // PUSH and POP have one operand
+            if (!op2.empty() || !op3.empty()) return 0;
+            return 32;
+        }
+        else{
 
-			// arithmetic and logic instructions have three operands
-			if (op1.empty() || op2.empty() || op3.empty()) return 0;
-			return 32;
-		}
-	}
-	return 64;
+            // arithmetic and logic instructions have three operands
+            if (op1.empty() || op2.empty() || op3.empty()) return 0;
+            return 32;
+        }
+    }
+    return 64;
 }
 
 std::string right_padding(const std::string &str, const size_t size){
-	std::string s = str;
-	while(s.length() < size) s+=' ';
-	return s;
+    std::string s = str;
+    while(s.length() < size) s+=' ';
+    return s;
 }
 
 std::string left_padding(const std::string &str, const size_t size){
-	std::string s = str;
-	s.insert(s.begin(), size-s.length(), ' ');
-	return s;
+    std::string s = str;
+    s.insert(s.begin(), size-s.length(), ' ');
+    return s;
 }
