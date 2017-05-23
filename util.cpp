@@ -1,6 +1,8 @@
 #include "util.h"
 #include <cstdlib> // strtol
 #include <set>
+#include <iostream>
+#include <stack>
 
 // *check first operand to get instruction size (32/64 bit)
 // have one operand
@@ -98,8 +100,8 @@ bool is_immed(const std::string &op){ // TODO
 }
 
 bool is_binary(const std::string &str){
-    return str[0] == '0' && (str[1] == 'b' || str[1] == 'B') && 
-           is_binaries(str.substr(2, std::string::npos));
+    return (str[0] == '0' && (str[1] == 'b' || str[1] == 'B') && 
+           is_binaries(str.substr(2, std::string::npos)));
 }
 
 bool is_hexadecimal(const std::string &str){
@@ -107,8 +109,12 @@ bool is_hexadecimal(const std::string &str){
            is_hexadecimals(str.substr(2, std::string::npos));
 }
 
+bool is_decimal(const std::string &str){
+    return (str[0] == '-' && is_digits(str.substr(1, std::string::npos))) || is_digits(str);
+}
+
 bool is_absolute(const std::string &str){
-    return is_digits(str) || is_binary(str) || is_hexadecimal(str);
+    return is_decimal(str) || is_binary(str) || is_hexadecimal(str);
 }
 
 bool is_const_expr(const std::string &str){ // TODO
@@ -122,9 +128,12 @@ int str_to_int(const std::string &str){
         return strtol(str.substr(2, std::string::npos).c_str(), nullptr, 2);
     if (is_hexadecimal(str)) 
         return strtol(str.substr(2, std::string::npos).c_str(), nullptr, 16);
-    if (is_digits(str)) 
+    if (is_decimal(str)) 
         return strtol(str.c_str(), nullptr, 10);
-    return 0;
+    if (str[0]=='\'' && str[2] == '\'' && isalpha(str[1]))
+        return str[1];
+    std::cout << "String to int conversion failed" << std::endl;
+    exit(3);
 }
 
 size_t get_instruction_size(const std::string &mne,
@@ -177,4 +186,139 @@ std::string left_padding(const std::string &str, const size_t size){
     std::string s = str;
     s.insert(s.begin(), size-s.length(), ' ');
     return s;
+}
+
+int getCurrentPrio(std::string op){
+    if (op == "(") return 4;
+    else if (op == "/" || op == "*") return 3;
+    else if (op == "+" || op == "-") return 2;
+    else if (op == ")") return 1;
+    else{
+        std::cout << "Operator unknown in constant expression! *" << op << "*"<< std::endl;
+        exit(2);
+    }
+}
+
+int getStackPrio(std::string op){
+    if (op == "(") return 0;
+    else if (op == "/" || op == "*") return 3;
+    else if (op == "+" || op == "-") return 2;
+    else{
+        std::cout << "Operator unknown in constant expression! *" << op << "*"<< std::endl;
+        exit(2);
+    }
+}
+
+bool is_lequ_prio(std::string op1, std::string op2){
+    return getCurrentPrio(op1) <= getStackPrio(op2);
+}
+
+std::string infix_to_postfix(std::string input){
+    // will check operators and operands number
+
+    std::string output= "";
+    std::stack<std::string> op_stack;
+    std::string token;
+
+    // must be equal to 1 at the end of conversion
+    int equilibrium = 0;
+
+    while (!input.empty()){
+        strip_off_spaces(input);
+        size_t found_op = input.find_first_of("+-/*()");
+
+        if (found_op != 0){
+            // if operand is found put it in output string
+
+            token = input.substr(0, found_op);
+            strip_off_spaces(token);
+            token.insert(0, " ");
+            output.insert(output.length(), token);
+
+            // increment for every operand found
+            equilibrium += 1;
+        }
+
+        if (found_op == std::string::npos) break;
+
+        // decrement for every binary operation found
+        if (is_operation(std::string(1,input[found_op]))) equilibrium -= 1;
+
+        while (!op_stack.empty() && is_lequ_prio(std::string(1,input[found_op]), op_stack.top())){
+            std::string opstr = " " + op_stack.top();
+            op_stack.pop();
+            output.insert(output.length(), opstr);
+        }
+        if (std::string(1,input[found_op]) == ")") op_stack.pop(); // stack will have "(" on top
+        else op_stack.push(std::string(1,input[found_op]));
+
+        input.erase(0, found_op+1);
+
+    }
+
+    while (!op_stack.empty()){
+        std::string opstr = " " + op_stack.top();
+        op_stack.pop();
+        output.insert(output.length(), opstr);
+    }
+
+    if (equilibrium != 1){
+        std::cout << "Constant expression error!" << equilibrium <<std::endl;
+        exit (2);
+    }
+
+    strip_off_spaces(output);
+    return output;
+}
+
+int calc_postfix(std::string input){
+    std::string token;
+    std::stack<std::string> ops_stack;
+
+    while (true){
+
+        size_t found_space = input.find(" ");
+        token = input.substr(0, found_space);
+        input.erase(0, found_space+1);
+        if (!is_operation(token)) ops_stack.push(token);
+        else if (is_operation(token)){
+            std::string op2 = ops_stack.top();
+            ops_stack.pop();
+            std::string op1 = ops_stack.top();
+            ops_stack.pop();
+
+            // TODO: import from symbol table
+
+            // if (!is_absolute(op1) || !is_absolute(op2)){ 
+            //     std :: cout << "Not absoulute operands in constant expression" << std::endl;
+            //     exit (2);
+            // }
+            int iop1 = str_to_int(op1);
+            int iop2 = str_to_int(op2);
+            int iresult;
+            if (token == "+") iresult = iop1 + iop2;
+            else if (token == "-") iresult = iop1 - iop2;
+            else if (token == "/") iresult = iop1 / iop2;
+            else if (token == "*") iresult = iop1 * iop2;
+
+            std::string result = std::to_string(iresult);
+
+            ops_stack.push(result);
+        }
+
+        if (found_space == std::string::npos) break;
+    }
+
+    std::string value = ops_stack.top();
+    ops_stack.pop();
+
+    return str_to_int(value);
+}
+
+bool is_operation(std::string op){
+    return op == "+" || op == "-" || op == "/" || op == "*";
+}
+
+int calc_const_expr(std::string input){
+    return calc_postfix(infix_to_postfix(input));
 }

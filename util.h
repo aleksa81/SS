@@ -45,6 +45,8 @@ bool is_binary(const std::string &str);
 
 bool is_hexadecimal(const std::string &str);
 
+bool is_decimal(const std::string &str);
+
 bool is_absolute(const std::string &str);
 
 bool is_const_expr(const std::string &str);
@@ -52,12 +54,26 @@ bool is_const_expr(const std::string &str);
 int str_to_int(const std::string &str);
 
 size_t get_instruction_size(const std::string &mne,
-						 const std::string &op1,
-						 const std::string &op2,
-						 const std::string &op3);
+						    const std::string &op1,
+						    const std::string &op2,
+						    const std::string &op3);
 
 std::string right_padding(const std::string &str, const size_t size);
 
 std::string left_padding(const std::string &str, const size_t size);
+
+int getStackPrio(std::string op);
+
+int getCurrentPrio(std::string op);
+
+bool is_lequ_prio(char op1, char op2);
+
+std::string infix_to_postfix(std::string input);
+
+int calc_postfix(std::string input);
+
+bool is_operation(std::string op);
+
+int calc_const_expr(std::string input);
 
 #endif
