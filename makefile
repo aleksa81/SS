@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-Wall -I. -std=c++11
-DEPS=TS_entry.h line.h util.h parser.h
-OBJ=main.o TS_entry.o line.o util.o parser.o
+DEPS=TS_entry.h line.h util.h parser.h relocation.h
+OBJ=main.o TS_entry.o line.o util.o parser.o relocation.cpp
 
 program: $(OBJ)
 	$(CC) -o $@ $^ -I.

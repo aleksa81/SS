@@ -115,7 +115,7 @@ bool Parser::is_section(std::string &line){
         Section::add_section(line, Parser::location_counter, section_type);
         Parser::location_counter = LC_START;
         if (Parser::ORG_FLAG == true){
-            Section::current->setStart(Parser::ORG_VALUE);
+            Section::current->setValue(Parser::ORG_VALUE);
             Parser::ORG_FLAG = false;
         }
         

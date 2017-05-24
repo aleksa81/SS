@@ -7,6 +7,8 @@
 #include "TS_entry.h"
 #include "parser.h"
 
+class Section;
+
 class Line{
 private:
     std::string label; //
@@ -19,8 +21,6 @@ private:
     Line* next;
     Line* prev;
 
-    static Line* head;
-    static Line* tail;
 public:
     Line(std::string mnemonic, 
          std::string op1,

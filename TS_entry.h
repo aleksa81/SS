@@ -1,6 +1,7 @@
 #ifndef TS_ENTRY_
 #define TS_ENTRY_
 
+#include "line.h"
 #include <unordered_map>
 #include <string>
 #include <iostream>
@@ -17,13 +18,18 @@
 
 // symbol types
 #define SYMBOL_LABEL (4)
-#define SYMBOL_CONSTANT (5)
-#define SYMBOL_EXTERN (6)
+#define SYMBOL_EXTERN (5)
+#define SYMBOL_CONSTANT (6)
+
+class Line;
+class Section;
 
 class TS_entry{
 private:
     std::string name;
-    unsigned short type; // for sections : data, text... for symbols: constant, label, extern
+    Section* section;
+    int value;
+    unsigned short type;
     unsigned int ID;
     unsigned short scope_flag;
     static std::unordered_map<std::string, TS_entry*> TS_entry_mapping;
@@ -43,6 +49,14 @@ public:
 
     std::string getName();
 
+    Section* getSection();
+
+    void setValue(int value);
+    int getValue();
+
+    bool is_label_or_extern();
+    bool is_constant();
+
     static bool is_key_word(const std::string &str);
     static void print();
     static void init();
@@ -58,15 +72,22 @@ protected:
     friend class Symbol;
     friend class Section;
     friend class Line;
+    friend int calc_postfix(std::string);
+    friend bool is_constant(const std::string&);
+    friend bool is_label_or_extern(const std::string&);
+    friend bool exists_symbol(const std::string&);
+    friend bool are_from_same_section_labels(const std::string&, 
+                                             const std::string&);
 };
 
 class Section: public TS_entry{
 private:
     size_t size;
-    size_t start;
     static TS_entry* head;
     static TS_entry* tail;
-    static int num_of_sections;
+
+    Line* line_head;
+    Line* line_tail;
 
 public:
     static Section* current;
@@ -77,28 +98,23 @@ public:
     void setSize(size_t size);
     size_t getSize();
 
-    void setStart(size_t start);
-    size_t getStart();
-
     static void add_section(std::string name, int location_cntr, std::string type);
 
     virtual std::string to_string() override;
 
+    static int num_of_sections;
+
     friend class TS_entry;
+    friend class Line;
 };
 
 class Symbol: public TS_entry{
 private:
-    int value;
-    Section* section;
     static TS_entry* head;
     static TS_entry* tail;
 
 public:
     Symbol(std::string name, int value, Section* section);
-
-    Section* getSection();
-    int getValue();
 
     static void add_symbol_as_global(std::string name, int value);
     static bool add_symbol_as_defined(std::string name, int value, unsigned short type);

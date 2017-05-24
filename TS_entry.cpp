@@ -47,12 +47,28 @@ std::string TS_entry::getName(){
     return this->name;
 }
 
+void TS_entry::setValue(int value){
+    this->value = value;
+}
+
+int TS_entry::getValue(){
+    return this->value;
+}
+
 void TS_entry::setType(unsigned short type){
     this->type = type;
 }
 
 unsigned short TS_entry::getType(){
     return this->type;
+}
+
+bool TS_entry::is_label_or_extern(){
+    return this->getType() >= SECTION_DATA && this->getType() <= SYMBOL_EXTERN;
+}
+
+bool TS_entry::is_constant(){
+    return this->getType() == SYMBOL_CONSTANT;
 }
 
 void TS_entry::init(){
@@ -79,9 +95,10 @@ bool TS_entry::is_key_word(const std::string &str){
 }
 
 Section::Section(std::string name):TS_entry(name){
-    this->start = 0;
+    this->value = 0;
     this->next = nullptr;
     this->prev = nullptr;
+    this->section = this;
     if (Section::head == nullptr){
         Section::head = Section::tail = this;
     }else{
@@ -120,14 +137,6 @@ void Section::add_section(std::string name, int location_cntr, std::string type)
     Section::current = section;
 }
 
-void Section::setStart(size_t start){
-    this->start = start;
-}
-
-size_t Section::getStart(){
-    return this->start;
-}
-
 Symbol::Symbol(std::string name, int value, Section* section)
 :TS_entry(name){
     this->section = section;
@@ -144,12 +153,8 @@ Symbol::Symbol(std::string name, int value, Section* section)
     }
 }
 
-Section* Symbol::getSection(){
+Section* TS_entry::getSection(){
     return this->section;
-}
-
-int Symbol::getValue(){
-    return this->value;
 }
 
 void Symbol::add_symbol_as_global(std::string name, int value){
@@ -194,7 +199,7 @@ std::string Section::to_string(){
            " " +
            right_padding(this->name, MAX_SEG_NAME_LEN) +
            left_padding(std::to_string(this->ID), 4) +
-           left_padding(std::to_string(this->start), 7) +
+           left_padding(std::to_string(this->value), 7) +
            left_padding(std::to_string(this->size), 7) +
            " " +
            flags;

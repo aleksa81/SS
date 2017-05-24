@@ -76,4 +76,17 @@ bool is_operation(std::string op);
 
 int calc_const_expr(std::string input);
 
+void error(const std::string &str, int ret);
+
+bool is_constant(const std::string &str);
+
+bool are_constants(const std::string&, const std::string&);
+
+bool is_label_or_extern(const std::string &str);
+
+bool are_from_same_section_labels(const std::string &l1, 
+	                              const std::string &l2);
+
+bool exists_symbol(const std::string& str);
+
 #endif

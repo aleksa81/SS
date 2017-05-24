@@ -1,4 +1,5 @@
 #include "util.h"
+#include "TS_entry.h"
 #include <cstdlib> // strtol
 #include <set>
 #include <iostream>
@@ -114,7 +115,8 @@ bool is_decimal(const std::string &str){
 }
 
 bool is_absolute(const std::string &str){
-    return is_decimal(str) || is_binary(str) || is_hexadecimal(str);
+    return is_decimal(str) || is_binary(str) || 
+       is_hexadecimal(str) || (str[0]=='\'' && str[2] == '\'' && isalpha(str[1]));
 }
 
 bool is_const_expr(const std::string &str){ // TODO
@@ -132,8 +134,8 @@ int str_to_int(const std::string &str){
         return strtol(str.c_str(), nullptr, 10);
     if (str[0]=='\'' && str[2] == '\'' && isalpha(str[1]))
         return str[1];
-    std::cout << "String to int conversion failed" << std::endl;
-    exit(3);
+    error("String to int conversion failed", 3);
+    return 0;
 }
 
 size_t get_instruction_size(const std::string &mne,
@@ -194,8 +196,8 @@ int getCurrentPrio(std::string op){
     else if (op == "+" || op == "-") return 2;
     else if (op == ")") return 1;
     else{
-        std::cout << "Operator unknown in constant expression! *" << op << "*"<< std::endl;
-        exit(2);
+        error("Operator unknown in constant expression!", 2);
+        return 0;
     }
 }
 
@@ -204,8 +206,8 @@ int getStackPrio(std::string op){
     else if (op == "/" || op == "*") return 3;
     else if (op == "+" || op == "-") return 2;
     else{
-        std::cout << "Operator unknown in constant expression! *" << op << "*"<< std::endl;
-        exit(2);
+        error("Operator unknown in constant expression!", 2);
+        return 0;
     }
 }
 
@@ -263,8 +265,7 @@ std::string infix_to_postfix(std::string input){
     }
 
     if (equilibrium != 1){
-        std::cout << "Constant expression error!" << equilibrium <<std::endl;
-        exit (2);
+        error("Constant expression error!", 2);
     }
 
     strip_off_spaces(output);
@@ -275,39 +276,94 @@ int calc_postfix(std::string input){
     std::string token;
     std::stack<std::string> ops_stack;
 
+    // TODO: relocation
+    //bool relocation = false;
+    
     while (true){
 
         size_t found_space = input.find(" ");
         token = input.substr(0, found_space);
         input.erase(0, found_space+1);
-        if (!is_operation(token)) ops_stack.push(token);
+        if (!is_operation(token)) 
+            ops_stack.push(token);
         else if (is_operation(token)){
+
             std::string op2 = ops_stack.top();
             ops_stack.pop();
+
             std::string op1 = ops_stack.top();
             ops_stack.pop();
 
-            // TODO: import from symbol table
+            // import from symbol table
+            int iop1, iop2, iresult;
+            TS_entry* symb1 = nullptr; 
+            TS_entry* symb2 = nullptr;
 
-            // if (!is_absolute(op1) || !is_absolute(op2)){ 
-            //     std :: cout << "Not absoulute operands in constant expression" << std::endl;
-            //     exit (2);
-            // }
-            int iop1 = str_to_int(op1);
-            int iop2 = str_to_int(op2);
-            int iresult;
-            if (token == "+") iresult = iop1 + iop2;
-            else if (token == "-") iresult = iop1 - iop2;
-            else if (token == "/") iresult = iop1 / iop2;
-            else if (token == "*") iresult = iop1 * iop2;
+            if (is_absolute(op1)) 
+                iop1 = str_to_int(op1);
+            else if(exists_symbol(op1)){
+                symb1 = TS_entry::TS_entry_mapping[op1];
+                iop1 = symb1->getValue();
+            }else 
+                error("Operand unknown in constant expression", 2);
+
+            if (is_absolute(op2)) 
+                iop2 = str_to_int(op2);
+            else if(exists_symbol(op2)){
+                symb2 = TS_entry::TS_entry_mapping[op2];
+                iop2 = symb2->getValue();
+            }else 
+                error("Operand unknown in constant expression", 2);
+            
+
+            if (token == "+") {
+                if (is_label_or_extern(op1) && is_constant(op2)){
+                    // TODO: relocation
+                    std::cout << "Relocation on symbol: " << symb1->getName() << std::endl;
+                }
+                else if (is_label_or_extern(op2) && is_constant(op1)){
+                    // TODO: relocation
+                    std::cout << "Relocation on symbol: " << symb2->getName() << std::endl;
+                }
+                else if (are_constants(op1,op2)){
+                    // idle
+                }
+                else 
+                    error("Illegal constant expression", 2);
+                iresult = iop1 + iop2;
+            }
+            else if (token == "-") {
+                if (is_label_or_extern(op1) && is_constant(op2)){
+                    // TODO: relocation
+                    std::cout << "Relocation on symbol: " << symb1->getName() << std::endl;
+                } 
+                else if (are_from_same_section_labels(op1,op2) || are_constants(op1, op2)){
+                    // idle
+                }
+                else 
+                    error("Illegal constant expression", 2);
+                iresult = iop1 - iop2;
+            }
+            else if (token == "/") {
+                if (!are_constants(op1,op2)) 
+                    error("Illegal constant expression", 2);
+                iresult = iop1 / iop2;
+            }
+            else if (token == "*") {
+                if (!are_constants(op1,op2)) 
+                    error("Illegal constant expression", 2);
+                iresult = iop1 * iop2;
+            }
 
             std::string result = std::to_string(iresult);
-
             ops_stack.push(result);
         }
 
-        if (found_space == std::string::npos) break;
+        if (found_space == std::string::npos) 
+            break;
     }
+
+    // TODO: relocation
 
     std::string value = ops_stack.top();
     ops_stack.pop();
@@ -321,4 +377,34 @@ bool is_operation(std::string op){
 
 int calc_const_expr(std::string input){
     return calc_postfix(infix_to_postfix(input));
+}
+
+void error(const std::string &str, int ret){
+    std::cout << str <<std::endl;
+    exit (ret);
+}
+
+bool is_constant(const std::string &str){
+    return is_absolute(str) || 
+           (exists_symbol(str) && TS_entry::TS_entry_mapping[str]->is_constant());
+}
+
+bool is_label_or_extern(const std::string &str){
+    return exists_symbol(str) &&
+           TS_entry::TS_entry_mapping[str]->is_label_or_extern();
+}
+
+bool are_from_same_section_labels(const std::string &l1, const std::string &l2){
+    return exists_symbol(l1) &&
+           exists_symbol(l2) &&
+           TS_entry::TS_entry_mapping[l1]->getSection()->getID() == 
+           TS_entry::TS_entry_mapping[l2]->getSection()->getID();
+}
+
+bool are_constants(const std::string& str1, const std::string& str2){
+    return is_constant(str1) && is_constant(str2);
+}
+
+bool exists_symbol(const std::string& str){
+    return TS_entry::TS_entry_mapping.find(str) != TS_entry::TS_entry_mapping.end();
 }
