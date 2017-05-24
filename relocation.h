@@ -20,7 +20,7 @@ public:
 	Relocation(size_t offset, std::string type, 
 			   int symbID, Section* my_section);
 
-}
+};
 
 
 
