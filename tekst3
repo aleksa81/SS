@@ -15,7 +15,8 @@ end3:
 
 .rodata
 DD 15 DUP ?
-x:
+x: DD 1 DUP 0
+z:
 
 .global x, y
 

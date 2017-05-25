@@ -314,17 +314,16 @@ int calc_postfix(std::string input, TS_entry*& reloc_symb){
             }else 
                 error("Operand unknown in constant expression", 2);
             
-
             if (token == "+") {
-                if (is_label_or_extern(op1) && is_constant(op2)){
+                if (is_label_or_extern(op1) && is_constant(op2) && reloc_symb == nullptr){
                     // Assign relocation symbol
                     reloc_symb = symb1;
-                    std::cout << "Relocation on symbol: " << symb1->getName() << std::endl;
+                    //std::cout << "Relocation on symbol: " << symb1->getName() << std::endl;
                 }
-                else if (is_label_or_extern(op2) && is_constant(op1)){
+                else if (is_label_or_extern(op2) && is_constant(op1) && reloc_symb == nullptr){
                     // Assign relocation symbol
                     reloc_symb = symb2;
-                    std::cout << "Relocation on symbol: " << symb2->getName() << std::endl;
+                    //std::cout << "Relocation on symbol: " << symb2->getName() << std::endl;
                 }
                 else if (are_constants(op1,op2)){
                     // Idle ...
@@ -334,10 +333,10 @@ int calc_postfix(std::string input, TS_entry*& reloc_symb){
                 iresult = iop1 + iop2;
             }
             else if (token == "-") {
-                if (is_label_or_extern(op1) && is_constant(op2)){
+                if (is_label_or_extern(op1) && is_constant(op2) && reloc_symb == nullptr){
                     // Assign relocation symbol
                     reloc_symb = symb1;
-                    std::cout << "Relocation on symbol: " << symb1->getName() << std::endl;
+                    //std::cout << "Relocation on symbol: " << symb1->getName() << std::endl;
                 } 
                 else if (are_from_same_section_labels(op1,op2) || are_constants(op1, op2)){
                     // Idle ...
