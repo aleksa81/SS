@@ -23,6 +23,7 @@
 
 class Line;
 class Section;
+class Symbol;
 
 class TS_entry{
 private:
@@ -54,6 +55,7 @@ public:
     void setValue(int value);
     int getValue();
 
+    bool is_in_static_section();
     bool is_label_or_extern();
     bool is_constant();
 
@@ -72,7 +74,7 @@ protected:
     friend class Symbol;
     friend class Section;
     friend class Line;
-    friend int calc_postfix(std::string);
+    friend int calc_postfix(std::string input, TS_entry*& rsymbol);
     friend bool is_constant(const std::string&);
     friend bool is_label_or_extern(const std::string&);
     friend bool exists_symbol(const std::string&);
@@ -85,6 +87,7 @@ private:
     size_t size;
     static TS_entry* head;
     static TS_entry* tail;
+    bool is_static; // is section defined with ORG?
 
     Line* line_head;
     Line* line_tail;
@@ -98,14 +101,18 @@ public:
     void setSize(size_t size);
     size_t getSize();
 
-    static void add_section(std::string name, int location_cntr, std::string type);
+    bool isStatic();
+
+    static void add_section(std::string &str, std::string type);
 
     virtual std::string to_string() override;
 
     static int num_of_sections;
 
     friend class TS_entry;
+    friend class Symbol;
     friend class Line;
+    friend class Parser;
 };
 
 class Symbol: public TS_entry{

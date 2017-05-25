@@ -148,34 +148,34 @@ size_t get_instruction_size(const std::string &mne,
 
     if (check_first_operand_mnemonics.find(mne) != check_first_operand_mnemonics.end()){
         if (!op2.empty() || !op3.empty()) return 0;
-        if (is_reg_dir(op1) || is_reg_ind(op1)) return 32;
+        if (is_reg_dir(op1) || is_reg_ind(op1)) return 4;
     }
     else if (check_second_operand_mnemonics.find(mne) != check_second_operand_mnemonics.end()){
         if (!op3.empty()) return 0;
-        if (is_reg_dir(op2) || is_reg_ind(op2)) return 32;
+        if (is_reg_dir(op2) || is_reg_ind(op2)) return 4;
     }
     else if(check_no_operand_mnemonics.find(mne) != check_no_operand_mnemonics.end()){
         if (mne == "RET"){
 
             // RET has no operands
             if (!op1.empty() || !op2.empty() || !op3.empty()) return 0;
-            return 32;
+            return 4;
 
         } 
         else if ((mne == "PUSH" || mne == "POP")){
 
             // PUSH and POP have one operand
             if (!op2.empty() || !op3.empty()) return 0;
-            return 32;
+            return 4;
         }
         else{
 
             // arithmetic and logic instructions have three operands
             if (op1.empty() || op2.empty() || op3.empty()) return 0;
-            return 32;
+            return 4;
         }
     }
-    return 64;
+    return 8;
 }
 
 std::string right_padding(const std::string &str, const size_t size){
@@ -272,19 +272,19 @@ std::string infix_to_postfix(std::string input){
     return output;
 }
 
-int calc_postfix(std::string input){
+int calc_postfix(std::string input, TS_entry*& reloc_symb){
     std::string token;
     std::stack<std::string> ops_stack;
 
-    // TODO: relocation
-    //bool relocation = false;
+    // Relocation symbol
+    reloc_symb = nullptr;
     
     while (true){
 
         size_t found_space = input.find(" ");
         token = input.substr(0, found_space);
         input.erase(0, found_space+1);
-        if (!is_operation(token)) 
+        if (!is_operation(token))
             ops_stack.push(token);
         else if (is_operation(token)){
 
@@ -294,7 +294,6 @@ int calc_postfix(std::string input){
             std::string op1 = ops_stack.top();
             ops_stack.pop();
 
-            // import from symbol table
             int iop1, iop2, iresult;
             TS_entry* symb1 = nullptr; 
             TS_entry* symb2 = nullptr;
@@ -318,15 +317,17 @@ int calc_postfix(std::string input){
 
             if (token == "+") {
                 if (is_label_or_extern(op1) && is_constant(op2)){
-                    // TODO: relocation
+                    // Assign relocation symbol
+                    reloc_symb = symb1;
                     std::cout << "Relocation on symbol: " << symb1->getName() << std::endl;
                 }
                 else if (is_label_or_extern(op2) && is_constant(op1)){
-                    // TODO: relocation
+                    // Assign relocation symbol
+                    reloc_symb = symb2;
                     std::cout << "Relocation on symbol: " << symb2->getName() << std::endl;
                 }
                 else if (are_constants(op1,op2)){
-                    // idle
+                    // Idle ...
                 }
                 else 
                     error("Illegal constant expression", 2);
@@ -334,11 +335,12 @@ int calc_postfix(std::string input){
             }
             else if (token == "-") {
                 if (is_label_or_extern(op1) && is_constant(op2)){
-                    // TODO: relocation
+                    // Assign relocation symbol
+                    reloc_symb = symb1;
                     std::cout << "Relocation on symbol: " << symb1->getName() << std::endl;
                 } 
                 else if (are_from_same_section_labels(op1,op2) || are_constants(op1, op2)){
-                    // idle
+                    // Idle ...
                 }
                 else 
                     error("Illegal constant expression", 2);
@@ -363,20 +365,36 @@ int calc_postfix(std::string input){
             break;
     }
 
-    // TODO: relocation
-
     std::string value = ops_stack.top();
     ops_stack.pop();
 
-    return str_to_int(value);
+    int ivalue;
+
+    // Will not be absolute when there is only one symbol to calculate
+    if (is_absolute(value)) 
+        ivalue = str_to_int(value);
+    else if (exists_symbol(value)) 
+        ivalue = TS_entry::TS_entry_mapping[value]->getValue();
+    else 
+        error("Operand unknown in constant expression", 2);
+
+    return ivalue;
 }
 
 bool is_operation(std::string op){
     return op == "+" || op == "-" || op == "/" || op == "*";
 }
 
-int calc_const_expr(std::string input){
-    return calc_postfix(infix_to_postfix(input));
+int calc_const_expr(std::string input, TS_entry*& reloc_symb){
+    return calc_postfix(infix_to_postfix(input), reloc_symb);
+}
+
+int calc_const_expr_no_reloc(std::string input){
+    TS_entry* reloc_symb = nullptr;
+    int result = calc_postfix(infix_to_postfix(input), reloc_symb);
+    if (reloc_symb != nullptr) 
+        error("Symbol relocation in absolute constant expression!", 2);
+    return result;
 }
 
 void error(const std::string &str, int ret){

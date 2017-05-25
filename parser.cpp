@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "util.h"
 #include "TS_entry.h"
+#include "mchunk.h"
 #include "line.h"
 
 #define LC_START (0)
@@ -37,7 +38,8 @@ void Parser::parse(std::string file_name){
         else if (Parser::is_org(line)) continue;
         else if (Parser::is_data_definition(line)) continue;
         else if (Parser::is_instruction(line)) continue;
-        else Parser::error("Syntax error.");
+        else if (label_name == "")
+            Parser::error("Syntax error.");
     }
 
     TS_entry::init();
@@ -51,11 +53,17 @@ void Parser::get_label(std::string &line){
         if (!is_alphanum(Parser::label_name) || TS_entry::is_key_word(Parser::label_name)){
             Parser::error("Illegal label definition.");
         }
-
-        bool ok = Symbol::add_symbol_as_defined(label_name, Parser::location_counter, SYMBOL_LABEL);
-        if (!ok){
-            Parser::error("Symbol redefinition.");
+        if (Section::current == nullptr){
+            Parser::error("Label in null section.");
         }
+
+        // Section::current->getValue() == 0 for all non-static sections
+        bool ok = Symbol::add_symbol_as_defined(label_name, 
+                                                Parser::location_counter + Section::current->getValue(), 
+                                                SYMBOL_LABEL);
+        if (!ok)
+            Parser::error("Symbol redefinition.");
+        
 
         // strip off label and spaces
         line.erase(0,found+1);
@@ -65,7 +73,13 @@ void Parser::get_label(std::string &line){
 
 bool Parser::is_end(std::string &line){
     if (line.substr(0,4) == ".end"){
-        Section::current->setSize(Parser::location_counter);
+        if (Section::current != nullptr){ 
+            Section::current->size = Parser::location_counter;
+            if (Section::current->is_static == true){
+                new Mchunk(Section::current->getValue(), 
+                           Section::current->getSize());
+            }
+        }
         return true;
     }
     return false;
@@ -112,18 +126,22 @@ bool Parser::is_section(std::string &line){
             Parser::error("Illegal section definition.");
         }
 
-        Section::add_section(line, Parser::location_counter, section_type);
-        Parser::location_counter = LC_START;
+        Section::add_section(line, section_type);
+
         if (Parser::ORG_FLAG == true){
             Section::current->setValue(Parser::ORG_VALUE);
+            Section::current->is_static = true;
             Parser::ORG_FLAG = false;
         }
+
+        Parser::location_counter = LC_START;
         
-        new Line(line, "", "", "", 0, true);
+        new Line(line, "", "", "", 0, true); // TODO: need this?
 
         return true;
     }
-    if (Parser::ORG_FLAG == true) Parser::error("No section definition after ORG.");
+    if (Parser::ORG_FLAG == true) 
+        Parser::error("No section definition after ORG.");
     return false;
 }
 
@@ -140,18 +158,17 @@ bool Parser::is_definition(std::string &line){
         std::string symbol_value = line.substr(found+5, std::string::npos);
 
         strip_off_spaces(symbol_value);
+        int isymbol_value;
 
-        // TODO: constant expression
-        if (!is_absolute(symbol_value)){
-            Parser::error("DEF must have an absolute argument.");
-        }
-
-        bool ok = Symbol::add_symbol_as_defined(symbol_name, str_to_int(symbol_value), SYMBOL_CONSTANT);
-        if (!ok){
+        // constant expression with no relocation
+        if (is_absolute(symbol_value)) isymbol_value = str_to_int(symbol_value);
+        else isymbol_value = calc_const_expr_no_reloc(symbol_value);
+        
+        bool ok = Symbol::add_symbol_as_defined(symbol_name, isymbol_value, SYMBOL_CONSTANT);
+        if (!ok)
             Parser::error("Symbol redefinition.");
-        }
 
-        new Line("DEF", symbol_name, symbol_value, "", 0, false);
+        new Line("DEF", symbol_name, symbol_value, "", 0, false); // TODO: need this?
 
         return true;
     }
@@ -162,13 +179,15 @@ bool Parser::is_org(std::string &line){
     if (line.substr(0,4) == "ORG "){
         std::string value = line.substr(4, std::string::npos);
         strip_off_spaces(value);
-        if (!is_absolute(value)){
-            Parser::error("ORG must have an absolute argument.");
-        }
-        Parser::ORG_VALUE = str_to_int(value);
+        int ivalue;
+
+        if (is_absolute(value)) ivalue = str_to_int(value);
+        else ivalue = calc_const_expr_no_reloc(value);
+
+        Parser::ORG_VALUE = ivalue;
         Parser::ORG_FLAG = true;
 
-        new Line("ORG", value, "", "", 0, false);
+        new Line("ORG", value, "", "", 0, false); // TODO: need this?
         return true;
     }
     return false;
@@ -193,20 +212,16 @@ bool Parser::is_data_definition(std::string &line){
         strip_off_spaces(data_value);
         strip_off_spaces(data_rept);
 
-        // TODO: constant expression
-        if (!is_absolute(data_rept) || !is_absolute(data_value)){
-            Parser::error("Ds must have absolute arguments.");
-        }
-
         int data_size;
-        int data_irept = str_to_int(data_rept);
+        int idata_rept = calc_const_expr_no_reloc(data_rept);
+
         if (line[1] == 'B') data_size = 1;
         else if (line[1] == 'W') data_size = 2;
         else data_size = 4;
 
-        Parser::location_counter += data_irept * data_size;
+        Parser::location_counter += idata_rept * data_size;
 
-        new Line(line.substr(0,2), data_rept, "DUP", data_value, data_irept * data_size, false);
+        new Line(line.substr(0,2), std::to_string(idata_rept), "DUP", data_value, idata_rept * data_size, false);
 
         return true;
     }

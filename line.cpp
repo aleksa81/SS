@@ -18,7 +18,6 @@ Line::Line(std::string mnemonic,
 
     this->is_section = is_section;
 
-
     this->next = nullptr;
     this->prev = nullptr;
 
@@ -37,7 +36,7 @@ Line::Line(std::string mnemonic,
 void Line::print(){
     for (TS_entry* s = Section::head; s != nullptr; s = s->next){
 
-        std::cout << "Section: " << s->getName() << " ID: "<< s->getID() << std::endl;
+        std::cout << "Section: " << s->getName() << " start: "<< s->getValue() << " size: "<< ((Section*)s)->getSize() << std::endl;
 
         for (Line* i = ((Section*)s)->line_head; i != nullptr; i=i->next){
             if (!i->label.empty()) std::cout << i->label << ": ";

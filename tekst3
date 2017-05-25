@@ -1,0 +1,22 @@
+ORG 0
+.text.1
+DD 12 DUP ?
+end1:
+
+ORG end1
+.text.2
+DW 15 DUP 5
+end2:
+
+ORG end2+2
+.data.1
+DD 20 DUP 3
+end3:
+
+.rodata
+DD 15 DUP ?
+x:
+
+.global x, y
+
+.end

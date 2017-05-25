@@ -1,5 +1,7 @@
 #include "TS_entry.h"
 #include "util.h"
+#include "mchunk.h"
+#include "parser.h"
 
 #define MAX_SEG_NAME_LEN (12)
 #define MAX_SYM_NAME_LEN (15)
@@ -64,11 +66,14 @@ unsigned short TS_entry::getType(){
 }
 
 bool TS_entry::is_label_or_extern(){
-    return this->getType() >= SECTION_DATA && this->getType() <= SYMBOL_EXTERN;
+    return (this->getType() >= SECTION_DATA && this->getType() <= SYMBOL_LABEL && 
+           !this->is_in_static_section()) || 
+           (this->getType() == SYMBOL_EXTERN);
 }
 
 bool TS_entry::is_constant(){
-    return this->getType() == SYMBOL_CONSTANT;
+    return this->getType() == SYMBOL_CONSTANT || 
+           this->is_in_static_section();
 }
 
 void TS_entry::init(){
@@ -94,11 +99,17 @@ bool TS_entry::is_key_word(const std::string &str){
     return true;
 }
 
+bool TS_entry::is_in_static_section(){
+    if (this->section != nullptr) return this->section->is_static;
+    return false;
+}
+
 Section::Section(std::string name):TS_entry(name){
     this->value = 0;
     this->next = nullptr;
     this->prev = nullptr;
     this->section = this;
+    this->is_static = false;
     if (Section::head == nullptr){
         Section::head = Section::tail = this;
     }else{
@@ -116,8 +127,12 @@ size_t Section::getSize(){
     return this->size;
 }
 
-void Section::add_section(std::string name, int location_cntr, std::string type){
-    Section* section = new Section(name);
+bool Section::isStatic(){
+    return this->is_static;
+}
+
+void Section::add_section(std::string &str, std::string type){
+    Section* section = new Section(str);
 
     if (type == "data") 
         section->type = SECTION_DATA;
@@ -131,8 +146,13 @@ void Section::add_section(std::string name, int location_cntr, std::string type)
     else if (type == "bss") 
         section->type = SECTION_BSS;
     
-    if (Section::current != nullptr) 
-        current->size = location_cntr;
+    if (Section::current != nullptr){ 
+        Section::current->size = Parser::location_counter;
+        if (Section::current->is_static == true){
+            new Mchunk(Section::current->getValue(), 
+                       Section::current->getSize());
+        }
+    }
 
     Section::current = section;
 }
@@ -194,6 +214,9 @@ std::string Section::to_string(){
     else if (this->type == SECTION_TEXT) flags = "XPA";
     else flags = "W-A";
 
+    if (this->isStatic()) flags.append("S");
+    else flags.append("-");
+
     return right_padding("SEG", 4) +
            left_padding(std::to_string(this->ID), 4) + 
            " " +
@@ -207,8 +230,10 @@ std::string Section::to_string(){
 
 std::string Symbol::to_string(){
     std::string my_section;
-    if (this->type == SYMBOL_EXTERN) my_section = "0";
-    else if (this->type == SYMBOL_CONSTANT) my_section = "-1";
+    if (this->type == SYMBOL_EXTERN) 
+        my_section = "0";
+    else if (this->type == SYMBOL_CONSTANT || this->section->is_static == true) 
+        my_section = "-1";
     else my_section = std::to_string(this->section->ID);
 
     std::string scope;

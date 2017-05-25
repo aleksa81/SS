@@ -8,20 +8,18 @@ class Section;
 
 class Relocation{
 private:
-	size_t offset;
-	std::string type;
-	int symbID;
-	Section* my_section;
+    size_t offset;
+    std::string type;
+    Symbol* my_symbol;
+    Section* my_section;
 
-	Relocation* next;
-	Relocation* prev;
+    Relocation* next;
+    Relocation* prev;
 public:
 
-	Relocation(size_t offset, std::string type, 
-			   int symbID, Section* my_section);
+    Relocation(size_t offset, std::string type, 
+               Symbol* symbol, Section* my_section);
 
 };
-
-
 
 #endif

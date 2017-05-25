@@ -1,4 +1,4 @@
-  
+    ORG 0x5
      .data.4                        
 
 labela_1: DW 5              
@@ -20,29 +20,29 @@ ORG 0xB
 
      L:   JMP   R1
 
-  LOAD R1, [0x5564]
+
         LOAD R2, [R5]
-       ADD    R3,    $labela_2,  31    ;ads dsds
+       ;ADD    R3,    $labela_2,  31    ;ads dsds
 
-       DD  5  DUP  11     ; adf
+      Bracki: DD  5  DUP  11     ; adf
 
-       SUB R1, R1,#34 ; asdasd
+       SUB R1, R1,R2 ; asdasd
 
                     JZ R0, $x ; asd
 
 .data.5
 a: DD 2
-;ORG 100
+ORG 287
 .text
 LOAD R1, a    ; ucitava sadrzaj memorijske lokacije a u registar R1
-y:LOAD R2, #a ; ucitava adresu lokacije a u registar R2
-z:LOAD R3, $a ; ucitava sadrzaj lokacije a u registar R3 koristeci PC relativno adresiranje
+y: LOAD R2, #a ; ucitava adresu lokacije a u registar R2
+LOAD R3, $a ; ucitava sadrzaj lokacije a u registar R3 koristeci PC relativno adresiranje
 x: JZ R0, x  ; apsolutni skok na lokaciju x
 JZ R0, $x ; PC relativni skok na lokaciju x
 
-b DEF x-y
+b DEF 4
 
-LOAD R1, [  123 +  a ]
+LOAD R1, [  R2 +  a ]
 
 ORG 0x0
 .rodata.1

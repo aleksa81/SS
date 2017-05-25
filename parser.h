@@ -48,6 +48,7 @@ public:
     void parse(std::string file_name);
 
     friend class Line;
+    friend class Section;
 
 };
 
