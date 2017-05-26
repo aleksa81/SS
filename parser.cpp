@@ -13,6 +13,8 @@ std::string Parser::label_name = "";
 int Parser::ORG_VALUE = 0;
 bool Parser::ORG_FLAG = false;
 
+bool Parser::was_ended = false;
+
 void Parser::parse(std::string file_name){
 
     std::ifstream my_file(file_name.c_str());
@@ -42,6 +44,9 @@ void Parser::parse(std::string file_name){
             Parser::error("Syntax error.");
     }
 
+    if (was_ended == false) 
+        Parser::error(".end missing.");
+
     TS_entry::init();
 }
 
@@ -50,13 +55,12 @@ void Parser::get_label(std::string &line){
     if (found != std::string::npos){
         Parser::label_name = line.substr(0, found);
 
-        if (!is_alphanum(Parser::label_name) || TS_entry::is_key_word(Parser::label_name)){
+        if (!is_alphanum(Parser::label_name) || TS_entry::is_key_word(Parser::label_name))
             Parser::error("Illegal label definition.");
-        }
-        if (Section::current == nullptr){
+        
+        if (Section::current == nullptr)
             Parser::error("Label in null section.");
-        }
-
+        
         // Section::current->getValue() == 0 for all non-static sections
         bool ok = Symbol::add_symbol_as_defined(label_name, 
                                                 Parser::location_counter + Section::current->getValue(), 
@@ -80,6 +84,7 @@ bool Parser::is_end(std::string &line){
                            Section::current->getSize());
             }
         }
+        Parser::was_ended = true;
         return true;
     }
     return false;
@@ -88,10 +93,9 @@ bool Parser::is_end(std::string &line){
 bool Parser::is_global(std::string &line){
     if (line.substr(0,7) == ".global"){
         size_t found_space = line.find(" ");
-        if (found_space == std::string::npos){
+        if (found_space == std::string::npos)
             Parser::error(".global arguments missing.");
-        }
-
+        
         std::string globals = line.substr(found_space+1, std::string::npos);
         strip_off_spaces(globals);
 
@@ -99,12 +103,14 @@ bool Parser::is_global(std::string &line){
             size_t found_comma = globals.find(",");
             std::string g_symbol = globals.substr(0, found_comma);
             strip_off_spaces(g_symbol);
+            if (!is_alphanum(g_symbol))
+                Parser::error("Illegal global argument.");
             globals.erase(0, found_comma+1);
             Symbol::add_symbol_as_global(g_symbol, 0);
             if (found_comma == std::string::npos) break;
         }
 
-        new Line(line, "", "", "", 0, false);
+        //new Line(line, "", "", "", 0, false); // need this for 2nd pass?
         return true;
     }
     return false;
@@ -117,10 +123,10 @@ bool Parser::is_section(std::string &line){
         if (found != std::string::npos) section_type = line.substr(1, found -1);
         else section_type = line.substr(1, std::string::npos);
 
-        // error?
         if (
             (section_type != "data" && section_type != "text" && section_type != "rodata" && section_type != "bss") || 
-            (found != std::string::npos && !is_digits(line.substr(found+1, std::string::npos))) || (TS_entry::is_key_word(line))
+            (found != std::string::npos && !is_digits(line.substr(found+1, std::string::npos))) || (TS_entry::is_key_word(line)) ||
+            line.substr(found+1, std::string::npos) == ""
             )
         {
             Parser::error("Illegal section definition.");
@@ -136,7 +142,7 @@ bool Parser::is_section(std::string &line){
 
         Parser::location_counter = LC_START;
         
-        new Line(line, "", "", "", 0, true); // TODO: need this?
+        //new Line(line, "", "", "", 0, true); // need this for 2nd pass?
 
         return true;
     }
@@ -152,9 +158,9 @@ bool Parser::is_definition(std::string &line){
         found_space = line.find(" ");
         std::string symbol_name = line.substr(0, found_space);
 
-        if (!is_alphanum(symbol_name) || TS_entry::is_key_word(symbol_name)){
+        if (!is_alphanum(symbol_name) || TS_entry::is_key_word(symbol_name))
             Parser::error("Illegal constant definition.");
-        }
+        
         std::string symbol_value = line.substr(found+5, std::string::npos);
 
         strip_off_spaces(symbol_value);
@@ -168,7 +174,7 @@ bool Parser::is_definition(std::string &line){
         if (!ok)
             Parser::error("Symbol redefinition.");
 
-        new Line("DEF", symbol_name, symbol_value, "", 0, false); // TODO: need this?
+        //new Line("DEF", symbol_name, symbol_value, "", 0, false); // need this for 2nd pass?
 
         return true;
     }
@@ -187,7 +193,7 @@ bool Parser::is_org(std::string &line){
         Parser::ORG_VALUE = ivalue;
         Parser::ORG_FLAG = true;
 
-        new Line("ORG", value, "", "", 0, false); // TODO: need this?
+        //new Line("ORG", value, "", "", 0, false); // need this for 2nd pass?
         return true;
     }
     return false;
@@ -199,6 +205,9 @@ bool Parser::is_data_definition(std::string &line){
         (line[2] == ' ') 
         ){
 
+        if (Section::current == nullptr) 
+            Parser::error("Data definition in null section.");
+
         std::string data_value = "";
         std::string data_rept = "1";
 
@@ -206,11 +215,14 @@ bool Parser::is_data_definition(std::string &line){
         if (found != std::string::npos){
             data_rept = line.substr(2, found-2);
             data_value = line.substr(found+4, std::string::npos);
-        }else{
+        }else
             data_value = line.substr(3, std::string::npos);
-        }
+        
         strip_off_spaces(data_value);
         strip_off_spaces(data_rept);
+
+        if (Section::current->getType() == SECTION_BSS && data_value != "?")
+            Parser::error("Data definiton in .bss must have '?' value.");
 
         int data_size;
         int idata_rept = calc_const_expr_no_reloc(data_rept);
@@ -221,7 +233,11 @@ bool Parser::is_data_definition(std::string &line){
 
         Parser::location_counter += idata_rept * data_size;
 
-        new Line(line.substr(0,2), std::to_string(idata_rept), "DUP", data_value, idata_rept * data_size, false);
+        new Line(line.substr(0,2), 
+                 std::to_string(idata_rept), 
+                 "DUP", 
+                 data_value, idata_rept * data_size, 
+                 false);
 
         return true;
     }
@@ -232,9 +248,14 @@ bool Parser::is_instruction(std::string &line){
     size_t found = line.find(" ");
     if (found != std::string::npos){
         std::string mnemonic = line.substr(0, found);
-        if (!is_mnemonic(mnemonic)){
+        if (!is_mnemonic(mnemonic))
             Parser::error("Unknown mnemonic error.");
-        }
+        
+        if (Section::current == nullptr)
+            Parser::error("Instruction in null section.");
+
+        if (Section::current->getType() != SECTION_TEXT)
+            Parser::error("Instruction not in .text section.");
 
         // Strip off mnemonic and make ops_string which contains all the operands.
         std::string ops_string = line.substr(found+1, std::string::npos);
@@ -260,23 +281,20 @@ bool Parser::is_instruction(std::string &line){
 
             strip_off_spaces(ops[i]);
 
-            if (ops[i].empty()){
+            if (ops[i].empty())
                 Parser::error("Comma syntax error.");
-            }
 
             ops_string.erase(0,found_comma+1);
             if (found_comma == std::string::npos) break;
         }
 
         // if there were 3 or more commas
-        if (found_comma != std::string::npos){
+        if (found_comma != std::string::npos)
             Parser::error("Too many arguments.");
-        }
 
         int instr_size = get_instruction_size(mnemonic, ops[0], ops[1], ops[2]);
-        if (instr_size == 0){
+        if (instr_size == 0)
             Parser::error("Arguments number mismatch.");
-        }
 
         Parser::location_counter += instr_size;
     

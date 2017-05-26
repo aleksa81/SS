@@ -11,7 +11,7 @@ int main(){
     Line::print();
     TS_entry::print();
 
-    std::cout << calc_const_expr_no_reloc("x+3+z") << std::endl;
+    //std::cout << calc_const_expr_no_reloc("x+y") << std::endl;
 
     return 0;
 }

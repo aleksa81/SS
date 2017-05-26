@@ -1,14 +1,16 @@
+
 ORG 0
 .text.1
 DD 12 DUP ?
+b:
 end1:
 
 ORG end1
 .text.2
-DW 15 DUP 5
+DW b DUP 4
 end2:
 
-ORG end2+2
+ORG end2
 .data.1
 DD 20 DUP 3
 end3:
@@ -16,8 +18,16 @@ end3:
 .rodata
 DD 15 DUP ?
 x: DD 1 DUP 0
-z:
+y:
+.global y
 
-.global x, y
+ORG end3
+.bss
+DD ? 
+end4:
+
+ORG end4
+.text
+LOAD R1,R2
 
 .end

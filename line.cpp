@@ -8,7 +8,8 @@ Line::Line(std::string mnemonic,
          size_t size,
          bool is_section){
 
-    this->label = Parser::label_name;
+    //this->label = Parser::label_name;
+    this->label = "";
     this->mnemonic = mnemonic;
     this->section = Section::current;
     ops[0] = op1;
@@ -17,6 +18,7 @@ Line::Line(std::string mnemonic,
     this->size = size;
 
     this->is_section = is_section;
+    this->line_number = Parser::line_counter;
 
     this->next = nullptr;
     this->prev = nullptr;
@@ -36,11 +38,12 @@ Line::Line(std::string mnemonic,
 void Line::print(){
     for (TS_entry* s = Section::head; s != nullptr; s = s->next){
 
-        std::cout << "Section: " << s->getName() << " start: "<< s->getValue() << " size: "<< ((Section*)s)->getSize() << std::endl;
+        std::cout << s->getName() << " start: "<< s->getValue() << " size: "<< ((Section*)s)->getSize() << std::endl;
 
         for (Line* i = ((Section*)s)->line_head; i != nullptr; i=i->next){
+            std::cout << "#" << i->line_number << " ";
             if (!i->label.empty()) std::cout << i->label << ": ";
-            std::cout << i->mnemonic << " ";
+            std::cout <<i->mnemonic << " ";
             for (int j=0;j<3;j++){
                 if (!i->ops[j].empty()) std::cout << i->ops[j] << " ";
             }
@@ -51,7 +54,6 @@ void Line::print(){
         std::cout << std::endl;
 
     }
-    std::cout << std::endl;
 }
 
 size_t Line::getSize(){

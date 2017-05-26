@@ -14,6 +14,8 @@ private:
     static int ORG_VALUE;
     static bool ORG_FLAG;
 
+    static bool was_ended;
+
     Parser(){}
 
     static void get_label(std::string &line);
@@ -24,10 +26,9 @@ private:
     static bool is_org(std::string &line);
     static bool is_data_definition(std::string &line);
     static bool is_instruction(std::string &line);
-    static void error(std::string body);
 
 public:
-
+    static void error(std::string body);
     static Parser& getInstance(){
 
         // initialized only once (on first encounter)

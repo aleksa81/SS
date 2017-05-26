@@ -18,6 +18,8 @@ private:
     size_t size;
     bool is_section;
 
+    int line_number;
+
     Line* next;
     Line* prev;
 

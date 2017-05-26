@@ -134,7 +134,7 @@ int str_to_int(const std::string &str){
         return strtol(str.c_str(), nullptr, 10);
     if (str[0]=='\'' && str[2] == '\'' && isalpha(str[1]))
         return str[1];
-    error("String to int conversion failed", 3);
+    Parser::error("String to int conversion failed.");
     return 0;
 }
 
@@ -196,7 +196,7 @@ int getCurrentPrio(std::string op){
     else if (op == "+" || op == "-") return 2;
     else if (op == ")") return 1;
     else{
-        error("Operator unknown in constant expression!", 2);
+        Parser::error("Operator unknown in constant expression.");
         return 0;
     }
 }
@@ -206,7 +206,7 @@ int getStackPrio(std::string op){
     else if (op == "/" || op == "*") return 3;
     else if (op == "+" || op == "-") return 2;
     else{
-        error("Operator unknown in constant expression!", 2);
+        Parser::error("Operator unknown in constant expression.");
         return 0;
     }
 }
@@ -265,7 +265,7 @@ std::string infix_to_postfix(std::string input){
     }
 
     if (equilibrium != 1){
-        error("Constant expression error!", 2);
+        Parser::error("Constant expression error.");
     }
 
     strip_off_spaces(output);
@@ -304,7 +304,7 @@ int calc_postfix(std::string input, TS_entry*& reloc_symb){
                 symb1 = TS_entry::TS_entry_mapping[op1];
                 iop1 = symb1->getValue();
             }else 
-                error("Operand unknown in constant expression", 2);
+                Parser::error("Operand unknown in constant expression.");
 
             if (is_absolute(op2)) 
                 iop2 = str_to_int(op2);
@@ -312,7 +312,7 @@ int calc_postfix(std::string input, TS_entry*& reloc_symb){
                 symb2 = TS_entry::TS_entry_mapping[op2];
                 iop2 = symb2->getValue();
             }else 
-                error("Operand unknown in constant expression", 2);
+                Parser::error("Operand unknown in constant expression.");
             
             if (token == "+") {
                 if (is_label_or_extern(op1) && is_constant(op2) && reloc_symb == nullptr){
@@ -329,7 +329,7 @@ int calc_postfix(std::string input, TS_entry*& reloc_symb){
                     // Idle ...
                 }
                 else 
-                    error("Illegal constant expression", 2);
+                    Parser::error("Illegal constant expression.");
                 iresult = iop1 + iop2;
             }
             else if (token == "-") {
@@ -342,17 +342,17 @@ int calc_postfix(std::string input, TS_entry*& reloc_symb){
                     // Idle ...
                 }
                 else 
-                    error("Illegal constant expression", 2);
+                    Parser::error("Illegal constant expression.");
                 iresult = iop1 - iop2;
             }
             else if (token == "/") {
                 if (!are_constants(op1,op2)) 
-                    error("Illegal constant expression", 2);
+                    Parser::error("Illegal constant expression.");
                 iresult = iop1 / iop2;
             }
             else if (token == "*") {
                 if (!are_constants(op1,op2)) 
-                    error("Illegal constant expression", 2);
+                    Parser::error("Illegal constant expression.");
                 iresult = iop1 * iop2;
             }
 
@@ -372,10 +372,13 @@ int calc_postfix(std::string input, TS_entry*& reloc_symb){
     // Will not be absolute when there is only one symbol to calculate
     if (is_absolute(value)) 
         ivalue = str_to_int(value);
-    else if (exists_symbol(value)) 
+    else if (exists_symbol(value)){ 
         ivalue = TS_entry::TS_entry_mapping[value]->getValue();
+        if (is_label_or_extern(value))
+            reloc_symb = TS_entry::TS_entry_mapping[value];
+    }
     else 
-        error("Operand unknown in constant expression", 2);
+        Parser::error("Operand unknown in constant expression.");
 
     return ivalue;
 }
@@ -392,13 +395,8 @@ int calc_const_expr_no_reloc(std::string input){
     TS_entry* reloc_symb = nullptr;
     int result = calc_postfix(infix_to_postfix(input), reloc_symb);
     if (reloc_symb != nullptr) 
-        error("Symbol relocation in absolute constant expression!", 2);
+        Parser::error("Symbol relocation in absolute constant expression.");
     return result;
-}
-
-void error(const std::string &str, int ret){
-    std::cout << str <<std::endl;
-    exit (ret);
 }
 
 bool is_constant(const std::string &str){

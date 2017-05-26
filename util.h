@@ -80,8 +80,6 @@ bool is_operation(std::string op);
 
 int calc_const_expr_no_reloc(std::string input);
 
-void error(const std::string &str, int ret);
-
 bool is_constant(const std::string &str);
 
 bool are_constants(const std::string&, const std::string&);
