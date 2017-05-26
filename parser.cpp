@@ -79,6 +79,11 @@ bool Parser::is_end(std::string &line){
     if (line.substr(0,4) == ".end"){
         if (Section::current != nullptr){ 
             Section::current->size = Parser::location_counter;
+            if (Section::current->size == 0){
+                std::cout << "Section: " << Section::current->getName() 
+                          << " is static but has size 0." << std::endl;
+                exit(1);
+            }
             if (Section::current->is_static == true){
                 new Mchunk(Section::current->getValue(), 
                            Section::current->getSize());

@@ -148,10 +148,12 @@ size_t get_instruction_size(const std::string &mne,
 
     if (check_first_operand_mnemonics.find(mne) != check_first_operand_mnemonics.end()){
         if (!op2.empty() || !op3.empty()) return 0;
+        if (op1.empty()) return 0;
         if (is_reg_dir(op1) || is_reg_ind(op1)) return 4;
     }
     else if (check_second_operand_mnemonics.find(mne) != check_second_operand_mnemonics.end()){
         if (!op3.empty()) return 0;
+        if (op1.empty() || op2.empty()) return 0;
         if (is_reg_dir(op2) || is_reg_ind(op2)) return 4;
     }
     else if(check_no_operand_mnemonics.find(mne) != check_no_operand_mnemonics.end()){
@@ -166,6 +168,7 @@ size_t get_instruction_size(const std::string &mne,
 
             // PUSH and POP have one operand
             if (!op2.empty() || !op3.empty()) return 0;
+            if (!is_reg_dir(op1)) return 0;
             return 4;
         }
         else{

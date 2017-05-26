@@ -23,11 +23,11 @@ y:
 
 ORG end3
 .bss
-DD ? 
+DD ?
 end4:
 
 ORG end4
 .text
-LOAD R1,R2
+ADD R1, R2, R3
 
 .end
