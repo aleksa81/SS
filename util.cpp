@@ -39,9 +39,9 @@ bool is_binaries(const std::string &str){
 }
 
 bool is_alphanum(const std::string &str){
-     for (size_t i = 0;i<str.length();i++){
+     for (size_t i = 0;i<str.length();i++)
         if (!isalnum(str[i]) && str[i] != '_') return false;
-     }
+     
      return true;
 }
 
@@ -55,9 +55,8 @@ void strip_off_spaces(std::string &str){
 
 void strip_off_comment(std::string &str){
     size_t found = str.find(';');
-    if (found != std::string::npos){
+    if (found != std::string::npos)
         str.erase(found, std::string::npos);
-    }
 }
 
 bool is_mnemonic(const std::string &str){
@@ -134,7 +133,9 @@ int str_to_int(const std::string &str){
         return strtol(str.c_str(), nullptr, 10);
     if (str[0]=='\'' && str[2] == '\'' && isalpha(str[1]))
         return str[1];
+
     Parser::error("String to int conversion failed.");
+
     return 0;
 }
 
@@ -166,7 +167,7 @@ size_t get_instruction_size(const std::string &mne,
         } 
         else if ((mne == "PUSH" || mne == "POP")){
 
-            // PUSH and POP have one operand
+            // PUSH and POP have one operand that must use reg. dir. addressing
             if (!op2.empty() || !op3.empty()) return 0;
             if (!is_reg_dir(op1)) return 0;
             return 4;
@@ -247,7 +248,8 @@ std::string infix_to_postfix(std::string input){
         if (found_op == std::string::npos) break;
 
         // decrement for every binary operation found
-        if (is_operation(std::string(1,input[found_op]))) equilibrium -= 1;
+        if (is_operation(std::string(1,input[found_op]))) 
+            equilibrium -= 1;
 
         while (!op_stack.empty() && is_lequ_prio(std::string(1,input[found_op]), op_stack.top())){
             std::string opstr = " " + op_stack.top();
@@ -267,10 +269,9 @@ std::string infix_to_postfix(std::string input){
         output.insert(output.length(), opstr);
     }
 
-    if (equilibrium != 1){
+    if (equilibrium != 1)
         Parser::error("Constant expression error.");
-    }
-
+    
     strip_off_spaces(output);
     return output;
 }
@@ -301,6 +302,7 @@ int calc_postfix(std::string input, TS_entry*& reloc_symb){
             TS_entry* symb1 = nullptr; 
             TS_entry* symb2 = nullptr;
 
+            // First operand
             if (is_absolute(op1)) 
                 iop1 = str_to_int(op1);
             else if(exists_symbol(op1)){
@@ -309,6 +311,7 @@ int calc_postfix(std::string input, TS_entry*& reloc_symb){
             }else 
                 Parser::error("Operand unknown in constant expression.");
 
+            // Second operand
             if (is_absolute(op2)) 
                 iop2 = str_to_int(op2);
             else if(exists_symbol(op2)){
@@ -317,34 +320,20 @@ int calc_postfix(std::string input, TS_entry*& reloc_symb){
             }else 
                 Parser::error("Operand unknown in constant expression.");
             
+            // Opration
             if (token == "+") {
-                if (is_label_or_extern(op1) && is_constant(op2) && reloc_symb == nullptr){
-                    // Assign relocation symbol
+                if (is_label_or_extern(op1) && is_constant(op2) && reloc_symb == nullptr)
                     reloc_symb = symb1;
-                    //std::cout << "Relocation on symbol: " << symb1->getName() << std::endl;
-                }
-                else if (is_label_or_extern(op2) && is_constant(op1) && reloc_symb == nullptr){
-                    // Assign relocation symbol
+                else if (is_label_or_extern(op2) && is_constant(op1) && reloc_symb == nullptr)  
                     reloc_symb = symb2;
-                    //std::cout << "Relocation on symbol: " << symb2->getName() << std::endl;
-                }
-                else if (are_constants(op1,op2)){
-                    // Idle ...
-                }
-                else 
+                else if (!are_constants(op1,op2))
                     Parser::error("Illegal constant expression.");
                 iresult = iop1 + iop2;
             }
             else if (token == "-") {
-                if (is_label_or_extern(op1) && is_constant(op2) && reloc_symb == nullptr){
-                    // Assign relocation symbol
+                if (is_label_or_extern(op1) && is_constant(op2) && reloc_symb == nullptr)
                     reloc_symb = symb1;
-                    //std::cout << "Relocation on symbol: " << symb1->getName() << std::endl;
-                } 
-                else if (are_from_same_section_labels(op1,op2) || are_constants(op1, op2)){
-                    // Idle ...
-                }
-                else 
+                else if (!(are_from_same_section_labels(op1,op2) || are_constants(op1, op2)))
                     Parser::error("Illegal constant expression.");
                 iresult = iop1 - iop2;
             }
