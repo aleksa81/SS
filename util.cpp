@@ -245,7 +245,8 @@ std::string infix_to_postfix(std::string input){
             equilibrium += 1;
         }
 
-        if (found_op == std::string::npos) break;
+        if (found_op == std::string::npos) 
+            break;
 
         // decrement for every binary operation found
         if (is_operation(std::string(1,input[found_op]))) 
