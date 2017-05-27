@@ -2,6 +2,7 @@
 #define TS_ENTRY_
 
 #include "line.h"
+#include "relocation.h"
 #include <unordered_map>
 #include <string>
 #include <iostream>
@@ -24,6 +25,7 @@
 class Line;
 class Section;
 class Symbol;
+class Relocation;
 
 class TS_entry{
 private:
@@ -74,6 +76,7 @@ protected:
     friend class Symbol;
     friend class Section;
     friend class Line;
+    friend class Loader;
     friend int calc_postfix(std::string input, TS_entry*& rsymbol);
     friend bool is_constant(const std::string&);
     friend bool is_label_or_extern(const std::string&);
@@ -91,6 +94,9 @@ private:
 
     Line* line_head;
     Line* line_tail;
+
+    Relocation* reloc_head;
+    Relocation* reloc_tail;
 
 public:
     static Section* current;
@@ -113,6 +119,8 @@ public:
     friend class Symbol;
     friend class Line;
     friend class Parser;
+    friend class Relocation;
+    friend class Loader;
 };
 
 class Symbol: public TS_entry{

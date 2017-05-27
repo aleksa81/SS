@@ -257,11 +257,13 @@ std::string Symbol::to_string(){
 }
 
 void TS_entry::print(){
+
+    std::cout << "Number of sections: " << Section::num_of_sections << "."<<std::endl;
+    std::cout << std::endl;
+    
     for (TS_entry* i = Section::head; i != nullptr; i = i->next){
         std::cout << i->to_string() << std::endl;
     }
-    std::cout << std::endl;
-    std::cout << "Number of sections: " << Section::num_of_sections << "."<<std::endl;
     std::cout << std::endl;
     for (TS_entry* i = Symbol::head; i != nullptr; i = i->next){
         std::cout << i->to_string() << std::endl;

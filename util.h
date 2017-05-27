@@ -3,14 +3,6 @@
 #include <string>
 #include <vector>
 
-#define MEM_DIR (0)
-#define MEM_IND (1)
-#define REG_DIR (2)
-#define REG_IND (3)
-#define REG_IND_DISP (4)
-#define PC_REL (5)
-#define IMMED (6)
-
 class TS_entry;
 
 bool is_digits(const std::string &str);
@@ -34,8 +26,6 @@ bool is_reg_dir(const std::string &op);
 bool is_reg_ind(const std::string &op);
 
 bool is_mem_dir(const std::string &op);
-
-bool is_mem_ind(const std::string &op);
 
 bool is_pc_rel(const std::string &op);
 

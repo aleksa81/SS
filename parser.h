@@ -5,6 +5,8 @@
 #include <string>
 #include <iostream>
 
+#define LC_START (0)
+
 class Parser{
 private:
     static std::string label_name;
@@ -50,6 +52,8 @@ public:
 
     friend class Line;
     friend class Section;
+    friend class Relocation;
+    friend class Loader;
 
 };
 

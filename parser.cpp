@@ -4,8 +4,6 @@
 #include "mchunk.h"
 #include "line.h"
 
-#define LC_START (0)
-
 int Parser::line_counter = 0;
 int Parser::location_counter = 0;
 std::string Parser::label_name = "";

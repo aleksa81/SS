@@ -35,24 +35,33 @@ Line::Line(std::string mnemonic,
     }
 }
 
-void Line::print(){
+std::string Line::to_string(){
+    std::string ops = "";
+
+    for (int j=0;j<3;j++)
+        if (!this->ops[j].empty())
+            ops.append(this->ops[j]+ std::string(" ")); 
+    
+    return "#" + 
+           std::to_string(this->line_number) + 
+           " " +
+           this->mnemonic + 
+           " " + 
+           ops +
+           "[ size = " + 
+           std::to_string(this->getSize()) + 
+           "]"; 
+}
+
+void Line::print_all(){
     for (TS_entry* s = Section::head; s != nullptr; s = s->next){
 
-        std::cout << s->getName() << " start: "<< s->getValue() << " size: "<< ((Section*)s)->getSize() << std::endl;
+        std::cout << s->getName() << std::endl;
 
         for (Line* i = ((Section*)s)->line_head; i != nullptr; i=i->next){
-            std::cout << "#" << i->line_number << " ";
-            if (!i->label.empty()) std::cout << i->label << ": ";
-            std::cout <<i->mnemonic << " ";
-            for (int j=0;j<3;j++){
-                if (!i->ops[j].empty()) std::cout << i->ops[j] << " ";
-            }
-            if (i->size != 0) std::cout << "[ size = " << i->size << "]";
-            if (i->is_section == true) std::cout << "[size = " << ((Section*)TS_entry::TS_entry_mapping[i->mnemonic])->getSize() << "]";
-            std::cout << std::endl;
+            std::cout << i->to_string() << std::endl;
         }
         std::cout << std::endl;
-
     }
 }
 

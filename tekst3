@@ -29,5 +29,7 @@ end4:
 ORG end4
 .text
 ADD R1, R2, R3
+LOAD R2, SP
+JMP R1
 
 .end

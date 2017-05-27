@@ -3,22 +3,21 @@
 
 #include <string>
 #include "TS_entry.h"
+#include "parser.h"
 
-class Section;
+class TS_entry;
 
 class Relocation{
 private:
     size_t offset;
     std::string type;
-    Symbol* my_symbol;
-    Section* my_section;
+    TS_entry* target;
 
     Relocation* next;
     Relocation* prev;
 public:
 
-    Relocation(size_t offset, std::string type, 
-               Symbol* symbol, Section* my_section);
+    Relocation(std::string type, TS_entry* target);
 
 };
 

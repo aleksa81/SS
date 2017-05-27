@@ -33,7 +33,11 @@ public:
 
     size_t getSize();
 
-    static void print();
+    std::string to_string();
+
+    static void print_all();
+
+    friend class Loader;
 };
 
 #endif
