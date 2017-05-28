@@ -7,23 +7,23 @@
 
 // *check first operand to get instruction size (32/64 bit)
 // have one operand
-const std::set<std::string> check_first_operand_mnemonics = 
+std::set<std::string> check_first_operand_mnemonics = 
 {"INT", "JMP", "CALL" };
 
 // *check second operand to get instruction size (32/64 bit)
 // have two operands
-const std::set<std::string> check_second_operand_mnemonics = 
+std::set<std::string> check_second_operand_mnemonics = 
 {"JZ", "JNZ", "JGZ", "JGEZ", "JLZ", "JLEZ", "LOAD", "STORE"};
 
 // *constant instruction size (32 bit)
 // RET - no operands
 // PUSH/POP - one operand (reg. dir. address mode)
 // rest - three operands (reg. dir. address mode)
-const std::set<std::string> check_no_operand_mnemonics =
+std::set<std::string> check_no_operand_mnemonics =
 {"RET", "PUSH", "POP", "ADD", "SUB", "MUL", "DIV", "MOD", "AND", "OR", "XOR", "NOT", "ASL", "ASR"};
 
 // all registers that are visible to user
-const std::set<std::string> regs = 
+std::set<std::string> regs = 
 {"R0","R1","R2","R3","R4","R5","R6","R7","R8","R9","R10","R11","R12","R13","R14","R15", "SP"};
 
 bool is_digits(const std::string &str){
@@ -172,6 +172,7 @@ size_t get_instruction_size(const std::string &mne,
 
             // arithmetic and logic instructions have three operands
             if (op1.empty() || op2.empty() || op3.empty()) return 0;
+            if (!is_reg_dir(op1) || !is_reg_dir(op2) || !is_reg_dir(op3)) return 0;
             return 4;
         }
     }

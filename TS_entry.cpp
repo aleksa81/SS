@@ -108,6 +108,12 @@ Section::Section(std::string name):TS_entry(name){
     this->value = 0;
     this->next = nullptr;
     this->prev = nullptr;
+
+    this->line_head = nullptr;
+    this->line_tail = nullptr;
+    this->reloc_head = nullptr;
+    this->reloc_tail = nullptr;
+
     this->section = this;
     this->is_static = false;
     if (Section::head == nullptr){
@@ -260,7 +266,7 @@ void TS_entry::print(){
 
     std::cout << "Number of sections: " << Section::num_of_sections << "."<<std::endl;
     std::cout << std::endl;
-    
+
     for (TS_entry* i = Section::head; i != nullptr; i = i->next){
         std::cout << i->to_string() << std::endl;
     }

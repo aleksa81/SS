@@ -77,6 +77,7 @@ protected:
     friend class Section;
     friend class Line;
     friend class Loader;
+    friend class Relocation;
     friend int calc_postfix(std::string input, TS_entry*& rsymbol);
     friend bool is_constant(const std::string&);
     friend bool is_label_or_extern(const std::string&);

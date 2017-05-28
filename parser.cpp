@@ -297,7 +297,7 @@ bool Parser::is_instruction(std::string &line){
 
         int instr_size = get_instruction_size(mnemonic, ops[0], ops[1], ops[2]);
         if (instr_size == 0)
-            Parser::error("Arguments number mismatch.");
+            Parser::error("Arguments number/type mismatch.");
 
         Parser::location_counter += instr_size;
     
@@ -308,6 +308,6 @@ bool Parser::is_instruction(std::string &line){
 }
 
 void Parser::error(std::string error_body){
-    std::cout << "Line: " << Parser::line_counter << ". " << error_body << std::endl;
+    std::cout << "\nLine: " << Parser::line_counter << ". " << error_body << std::endl;
     exit(1);
 }

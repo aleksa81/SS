@@ -17,7 +17,11 @@ private:
     Relocation* prev;
 public:
 
-    Relocation(std::string type, TS_entry* target);
+    Relocation(int offset, std::string type, TS_entry* target);
+
+    std::string to_string();
+
+    static void print_all();
 
 };
 

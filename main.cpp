@@ -4,6 +4,7 @@
 #include "parser.h"
 #include "mchunk.h"
 #include "loader.h"
+#include "relocation.h"
 
 int main(){
 
@@ -15,6 +16,8 @@ int main(){
     //std::cout << calc_const_expr_no_reloc(" (x - y) +3 ") << std::endl;
 
     Loader::getInstance().load();
+
+    Relocation::print_all();
 
     return 0;
 }

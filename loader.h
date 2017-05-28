@@ -12,7 +12,6 @@ private:
 	static std::unordered_map<std::string, char> regcode;
 
 public:
-
 	static Loader& getInstance(){
 
         // initialized only once (on first encounter)
@@ -32,12 +31,6 @@ public:
 
     void load();
 
-
 };
-
-
-
-
-
 
 #endif
