@@ -6,13 +6,13 @@
 
 class Loader{
 private:
-	Loader(){}
+    Loader(){}
 
-	static std::unordered_map<std::string, char> opcode;
-	static std::unordered_map<std::string, char> regcode;
+    static std::unordered_map<std::string, char> opcode;
+    static std::unordered_map<std::string, char> regcode;
 
 public:
-	static Loader& getInstance(){
+    static Loader& getInstance(){
 
         // initialized only once (on first encounter)
         // deleted when program terminates
