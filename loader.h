@@ -3,15 +3,27 @@
 
 #include <unordered_map>
 #include <string>
+#include "TS_entry.h"
+
+class TS_entry;
 
 class Loader{
 private:
     Loader(){}
 
-    static std::unordered_map<std::string, char> opcode;
-    static std::unordered_map<std::string, char> regcode;
+    static std::string operand;
+    static std::string reloc_type;
+    static int value;
+    static TS_entry* reloc_symb;
+    static std::string reg;
+    static int disp;
+    static int adr_mode;
+
+    static std::unordered_map<std::string, int> opcode;
+    static std::unordered_map<std::string, int> regcode;
 
 public:
+
     static Loader& getInstance(){
 
         // initialized only once (on first encounter)
@@ -30,6 +42,22 @@ public:
     //       before deleted status.
 
     void load();
+
+    static void process_reg_ind_disp(int regpos);
+    static void process_reg_dir(int regpos);
+    static void process_pc_rel(int regpos);
+    static void process_immed();
+    static void process_mem_dir();
+
+    static bool is_store(const std::string &str);
+    static bool is_load(const std::string &str);
+    static bool is_INT(const std::string &str);
+    static bool is_JZ(const std::string &str);
+
+    static void process_store(const std::string &str);
+    static void process_load(const std::string &str);
+
+
 
 };
 

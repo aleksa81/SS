@@ -21,17 +21,17 @@ bool is_mnemonic(const std::string &str);
 
 bool is_key_word(const std::string &str);
 
-bool is_reg_dir(const std::string &op);
+bool is_reg_dir(const std::string &op); // addressing
 
-bool is_reg_ind(const std::string &op);
+bool is_reg_ind(const std::string &op); // addressing
 
-bool is_mem_dir(const std::string &op);
+bool is_mem_dir(const std::string &op); // addressing
 
-bool is_pc_rel(const std::string &op);
+bool is_pc_rel(const std::string &op); // addressing
 
-bool is_reg_ind_disp(const std::string &op);
+bool is_immed(const std::string &op); // addressing
 
-bool is_immed(const std::string &op);
+bool is_reg_ind_disp(const std::string &op, std::string &reg, int &value); // addressing
 
 bool is_binary(const std::string &str);
 
@@ -80,5 +80,7 @@ bool are_from_same_section_labels(const std::string &l1,
                                   const std::string &l2);
 
 bool exists_symbol(const std::string& str);
+
+std::string get_reg(const std::string& str);
 
 #endif

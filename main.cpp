@@ -19,5 +19,29 @@ int main(){
 
     Relocation::print_all();
 
+    // std::string reg = "";
+    // int value = -1;
+    // std::cout << is_reg_ind_disp("[ R1 + 3 + 4- 4 ]", reg, value)<<std::endl;
+    // std::cout << reg << " " << value << std::endl;
+
+
+    // TS_entry* tse = nullptr;
+    // std::string s = " 5  ";
+    // int a = calc_const_expr("4 + 5 + 2 +1", tse);
+
+    // std::cout << a << std::endl;
+
+    // char * a = new char[10];
+    // for (int i=0;i<10;i++)
+    //     *(a+i) = 0;
+
+    // *((int*)(a+0)) = 1<<24;
+    // // *((int*)a) |= (1<<24);
+
+    // for (int i=0;i<10;i++)
+    //     std::cout << (int)(*(a+i)) << " ";
+
+    // std::cout << std::endl;
+
     return 0;
 }

@@ -76,16 +76,20 @@ void Parser::get_label(std::string &line){
 bool Parser::is_end(std::string &line){
     if (line.substr(0,4) == ".end"){
         if (Section::current != nullptr){ 
+
             Section::current->size = Parser::location_counter;
-            if (Section::current->size == 0){
+
+            if (Section::current->is_static == true && Section::current->size == 0){
                 std::cout << "Section: " << Section::current->getName() 
                           << " is static but has size 0." << std::endl;
                 exit(1);
             }
+
             if (Section::current->is_static == true){
                 new Mchunk(Section::current->getValue(), 
                            Section::current->getSize());
             }
+
         }
         Parser::was_ended = true;
         return true;
@@ -110,10 +114,10 @@ bool Parser::is_global(std::string &line){
                 Parser::error("Illegal global argument.");
             globals.erase(0, found_comma+1);
             Symbol::add_symbol_as_global(g_symbol, 0);
-            if (found_comma == std::string::npos) break;
+            if (found_comma == std::string::npos) 
+                break;
         }
 
-        //new Line(line, "", "", "", 0, false); // need this for 2nd pass?
         return true;
     }
     return false;
@@ -123,8 +127,10 @@ bool Parser::is_section(std::string &line){
     if (line[0] == '.'){
         size_t found = line.find('.',1);
         std::string section_type;
-        if (found != std::string::npos) section_type = line.substr(1, found -1);
-        else section_type = line.substr(1, std::string::npos);
+        if (found != std::string::npos) 
+            section_type = line.substr(1, found -1);
+        else 
+            section_type = line.substr(1, std::string::npos);
 
         if (
             (section_type != "data" && section_type != "text" && section_type != "rodata" && section_type != "bss") || 
@@ -135,6 +141,9 @@ bool Parser::is_section(std::string &line){
             Parser::error("Illegal section definition.");
         }
 
+        if (TS_entry::TS_entry_mapping.find(line) != TS_entry::TS_entry_mapping.end())
+            Parser::error("Section redefinition.");
+
         Section::add_section(line, section_type);
 
         if (Parser::ORG_FLAG == true){
@@ -144,8 +153,6 @@ bool Parser::is_section(std::string &line){
         }
 
         Parser::location_counter = LC_START;
-        
-        //new Line(line, "", "", "", 0, true); // need this for 2nd pass?
 
         return true;
     }
@@ -170,14 +177,14 @@ bool Parser::is_definition(std::string &line){
         int isymbol_value;
 
         // constant expression with no relocation
-        if (is_absolute(symbol_value)) isymbol_value = str_to_int(symbol_value);
-        else isymbol_value = calc_const_expr_no_reloc(symbol_value);
+        if (is_absolute(symbol_value)) 
+            isymbol_value = str_to_int(symbol_value);
+        else 
+            isymbol_value = calc_const_expr_no_reloc(symbol_value);
         
         bool ok = Symbol::add_symbol_as_defined(symbol_name, isymbol_value, SYMBOL_CONSTANT);
         if (!ok)
             Parser::error("Symbol redefinition.");
-
-        //new Line("DEF", symbol_name, symbol_value, "", 0, false); // need this for 2nd pass?
 
         return true;
     }
@@ -196,7 +203,6 @@ bool Parser::is_org(std::string &line){
         Parser::ORG_VALUE = ivalue;
         Parser::ORG_FLAG = true;
 
-        //new Line("ORG", value, "", "", 0, false); // need this for 2nd pass?
         return true;
     }
     return false;
@@ -227,6 +233,9 @@ bool Parser::is_data_definition(std::string &line){
         if (Section::current->getType() == SECTION_BSS && data_value != "?")
             Parser::error("Data definiton in .bss must have '?' value.");
 
+        if (Section::current->getType() == SECTION_RODATA && data_value == "?")
+            Parser::error("Data definition undefined in .rodata section.");
+
         int data_size;
         int idata_rept = calc_const_expr_no_reloc(data_rept);
 
@@ -239,7 +248,8 @@ bool Parser::is_data_definition(std::string &line){
         new Line(line.substr(0,2), 
                  std::to_string(idata_rept), 
                  "DUP", 
-                 data_value, idata_rept * data_size, 
+                 data_value, 
+                 idata_rept * data_size, 
                  false);
 
         return true;

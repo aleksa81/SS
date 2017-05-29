@@ -3,7 +3,7 @@
 #include "mchunk.h"
 #include "parser.h"
 
-#define MAX_SEG_NAME_LEN (12)
+#define MAX_SEG_NAME_LEN (15)
 #define MAX_SYM_NAME_LEN (15)
 
 TS_entry* Section::head = nullptr;
@@ -85,7 +85,17 @@ void TS_entry::init(){
     for (TS_entry* i = Section::head; i != nullptr;i = i->next){
         i->setID(++ID);
         Section::num_of_sections++;
+
+        int size = ((Section*)i)->getSize();
+
+        if (size > 0 ){
+            ((Section*)i)->machine_code = new char[size*sizeof(char)];
+            for (int k = 0 ; k < size ; k++)
+                (((Section*)i)->machine_code)[k] = 0;
+        }
     }
+
+    std::cout << std::endl;
 
     // assign IDs to symbols 
     for (TS_entry* i = Symbol::head; i != nullptr;i = i->next){
@@ -100,7 +110,8 @@ bool TS_entry::is_key_word(const std::string &str){
 }
 
 bool TS_entry::is_in_static_section(){
-    if (this->section != nullptr) return this->section->is_static;
+    if (this->section != nullptr) 
+        return this->section->is_static;
     return false;
 }
 
@@ -114,6 +125,7 @@ Section::Section(std::string name):TS_entry(name){
     this->reloc_head = nullptr;
     this->reloc_tail = nullptr;
 
+    this->machine_code = nullptr;
     this->section = this;
     this->is_static = false;
     if (Section::head == nullptr){
@@ -153,8 +165,10 @@ void Section::add_section(std::string &str, std::string type){
         section->type = SECTION_BSS;
     
     if (Section::current != nullptr){ 
+
         Section::current->size = Parser::location_counter;
-        if (Section::current->size == 0){
+
+        if (Section::current->is_static == true && Section::current->size == 0){
                 std::cout << "Section: " << Section::current->getName() 
                           << " is static but has size 0." << std::endl;
                 exit(1);
@@ -246,7 +260,8 @@ std::string Symbol::to_string(){
         my_section = "0";
     else if (this->type == SYMBOL_CONSTANT || this->section->is_static == true) 
         my_section = "-1";
-    else my_section = std::to_string(this->section->ID);
+    else 
+        my_section = std::to_string(this->section->ID);
 
     std::string scope;
     if (this->scope_flag == SCOPE_GLOBAL) scope = "G";
@@ -264,8 +279,10 @@ std::string Symbol::to_string(){
 
 void TS_entry::print(){
 
-    std::cout << "Number of sections: " << Section::num_of_sections << "."<<std::endl;
-    std::cout << std::endl;
+    //std::cout << "Number of sections: " << Section::num_of_sections << "."<<std::endl;
+    //std::cout << std::endl;
+
+    std::cout << "SYMBOL TABLE" << std::endl;
 
     for (TS_entry* i = Section::head; i != nullptr; i = i->next){
         std::cout << i->to_string() << std::endl;

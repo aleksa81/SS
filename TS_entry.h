@@ -78,6 +78,7 @@ protected:
     friend class Line;
     friend class Loader;
     friend class Relocation;
+    friend class Parser;
     friend int calc_postfix(std::string input, TS_entry*& rsymbol);
     friend bool is_constant(const std::string&);
     friend bool is_label_or_extern(const std::string&);
@@ -92,6 +93,8 @@ private:
     static TS_entry* head;
     static TS_entry* tail;
     bool is_static; // is section defined with ORG?
+
+    char* machine_code;
 
     Line* line_head;
     Line* line_tail;

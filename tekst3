@@ -1,43 +1,32 @@
-
 ORG 0
 .text.1
-DD 12 DUP ?
+a:DD 12 DUP ?
+b:DD ?
+JMP $k                 ; pc rel - PC iz ORG, k iz ORG
+JMP $c                 ; pc rel - PC iz ORG, c nije iz ORG + c je globalan
+JMP $h                 ; pc rel - PC iz ORG, h nije iz ORG + h je lokalan
 end1:
-
-.text.2
-b: LOAD R1, b
-c: LOAD R1, c
 
 ORG end1
 .text.2
-DW 48 DUP 4
-end2:
+k:DW 48 DUP 4
+JMP $1234              ; pc rel - apsolutna adresa u ORG sekciji
 
-ORG end2
-.data.1
-DD 20 DUP 3
-end3:
+.global k,c,d
 
-.rodata
-DD 15 DUP ?
-x: DD 1 DUP 0
-y:
-.global y, o, b
+.text.3
+c:DD 3
+JMP $a                 ; pc rel - PC nije iz ORG, a je iz ORG + a je lokalan
+e:JMP $1234            ; pc rel - apsolutna adresa u ne ORG sekciji
+JMP $c                 ; pc rel - PC i c iz iste sekcije
 
-ORG end3
-.bss
-DD ?
-end4:
-
-ORG end4
-.text
-z:ADD R1, R2, R3
-k:LOAD R2, $(z+3)
-LOAD R1, $(k+1)
-LOAD R4, #(x+1)
-DD 12 DUP (x-y) + k + b
-LOAD R3, #((z-k)+5+y)
-JZ R0, $b
-JMP R1
+.text.5
+ADD R1, R2, R3
+JMP $c                 ; pc rel - PC nije iz ORG, c nije iz ORG + c je globalan
+JMP $e                 ; pc rel - PC nije iz ORG, e nije iz ORG + e je lokalan
+JZ R1, k               ; mem dir - k iz ORG + k je globlan
+h:JZ R1, c             ; mem dir - c nije iz ORG + c je globalan
+JZ R1, a               ; mem dir - a iz ORG + a je lokalan
+JZ R1, e               ; mem dir - e nije iz ORG + e je lokalan
 
 .end

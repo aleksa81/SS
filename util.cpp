@@ -13,7 +13,7 @@ std::set<std::string> check_first_operand_mnemonics =
 // *check second operand to get instruction size (32/64 bit)
 // have two operands
 std::set<std::string> check_second_operand_mnemonics = 
-{"JZ", "JNZ", "JGZ", "JGEZ", "JLZ", "JLEZ", "LOAD", "STORE"};
+{"JZ", "JNZ", "JGZ", "JGEZ", "JLZ", "JLEZ", "LOAD", "STORE", "UBLOAD", "SBLOAD", "UWLOAD", "SWLOAD","BSTORE", "WSTORE"};
 
 // *constant instruction size (32 bit)
 // RET - no operands
@@ -24,7 +24,7 @@ std::set<std::string> check_no_operand_mnemonics =
 
 // all registers that are visible to user
 std::set<std::string> regs = 
-{"R0","R1","R2","R3","R4","R5","R6","R7","R8","R9","R10","R11","R12","R13","R14","R15", "SP"};
+{"R0","R1","R2","R3","R4","R5","R6","R7","R8","R9","R10","R11","R12","R13","R14","R15","SP","PC"};
 
 bool is_digits(const std::string &str){
     return str.find_first_not_of("0123456789") == std::string::npos;
@@ -71,28 +71,55 @@ bool is_reg_dir(const std::string &op){
 }
 
 bool is_reg_ind(const std::string &op){
-    size_t found1 = op.find("[");
-    size_t found2 = op.find("]");
-    std::string reg = op.substr(found1+1, found2-found1-1);
-    strip_off_spaces(reg);
+    std::string reg = get_reg(op);
     return regs.find(reg) != regs.end(); 
 }
 
-bool is_mem_dir(const std::string &op){ // TODO
+std::string get_reg(const std::string& str){
+    size_t found1 = str.find("[");
+    size_t found2 = str.find("]");
+    std::string reg = str.substr(found1+1, found2-found1-1);
+    strip_off_spaces(reg);
+    return reg;
+}
+
+bool is_mem_dir(const std::string &op){ 
+    if (op[0] != '$' && op[0] != '#')return true;
     return true;
 } 
 
 bool is_pc_rel(const std::string &op){
-    return op[0] == '$' && 
-           (is_alphanum(op.substr(1, std::string::npos)) || is_absolute(op.substr(1, std::string::npos)));
-}
-
-bool is_reg_ind_disp(const std::string &op){ // TODO
+    if (op[0]!='$') return false;
     return true;
 }
 
-bool is_immed(const std::string &op){ // TODO
+bool is_immed(const std::string &op){ 
+    if (op[0]!='#') return false;
     return true;
+}
+
+bool is_reg_ind_disp(const std::string &op, std::string &reg, int &value){ 
+    if (op[0]=='[' && op[op.length()-1] == ']'){
+
+        size_t found_plus = op.find("+");
+        size_t found_bracket = op.find("]");
+
+        if (found_plus != std::string::npos){
+            reg = op.substr(1, found_plus - 1);
+            std::string svalue = op.substr(found_plus+1, found_bracket - found_plus -1);
+            value = calc_const_expr_no_reloc(svalue);
+        }
+        else{
+            reg = op.substr(1, found_bracket - 1);
+            value = 0;
+        }
+
+        strip_off_spaces(reg);
+        if(regs.find(reg) == regs.end())
+            return false;
+        return true;
+    }
+    return false;
 }
 
 bool is_binary(const std::string &str){
@@ -139,9 +166,9 @@ size_t get_instruction_size(const std::string &mne,
                             const std::string &op1,
                             const std::string &op2,
                             const std::string &op3){
-    // returns instruction size
-    // if the number of operands for given mnemonic is not valid, returns 0
-    // address type validity will be checked in second assembly pass
+    // Returns instruction size.
+    // Checks number of operands.
+    // Checks reg. dir. addressing where it's the only address mode allowed.
 
     if (check_first_operand_mnemonics.find(mne) != check_first_operand_mnemonics.end()){
         if (!op2.empty() || !op3.empty()) return 0;
@@ -220,13 +247,14 @@ std::string infix_to_postfix(std::string input){
     // will check operators and operands number
 
     std::string output= "";
-    std::stack<std::string> op_stack;
-    std::string token;
+    std::stack<std::string> *op_stack = new std::stack<std::string>();
+    std::string token = "";
 
     // must be equal to 1 at the end of conversion
     int equilibrium = 0;
 
     while (!input.empty()){
+
         strip_off_spaces(input);
         size_t found_op = input.find_first_of("+-/*()");
 
@@ -249,21 +277,23 @@ std::string infix_to_postfix(std::string input){
         if (is_operation(std::string(1,input[found_op]))) 
             equilibrium -= 1;
 
-        while (!op_stack.empty() && is_lequ_prio(std::string(1,input[found_op]), op_stack.top())){
-            std::string opstr = " " + op_stack.top();
-            op_stack.pop();
+        while (!op_stack->empty() && is_lequ_prio(std::string(1,input[found_op]), op_stack->top())){
+            std::string opstr = " " + op_stack->top();
+            op_stack->pop();
             output.insert(output.length(), opstr);
         }
-        if (std::string(1,input[found_op]) == ")") op_stack.pop(); // stack will have "(" on top
-        else op_stack.push(std::string(1,input[found_op]));
+        if (std::string(1,input[found_op]) == ")") 
+            op_stack->pop(); // stack will have "(" on top
+        else 
+            op_stack->push(std::string(1,input[found_op]));
 
         input.erase(0, found_op+1);
 
     }
 
-    while (!op_stack.empty()){
-        std::string opstr = " " + op_stack.top();
-        op_stack.pop();
+    while (!op_stack->empty()){
+        std::string opstr = " " + op_stack->top();
+        op_stack->pop();
         output.insert(output.length(), opstr);
     }
 
@@ -271,12 +301,13 @@ std::string infix_to_postfix(std::string input){
         Parser::error("Constant expression error.");
     
     strip_off_spaces(output);
+
     return output;
 }
 
 int calc_postfix(std::string input, TS_entry*& reloc_symb){
     std::string token;
-    std::stack<std::string> ops_stack;
+    std::stack<std::string> *ops_stack = new std::stack<std::string>();
 
     // Relocation symbol
     reloc_symb = nullptr;
@@ -287,14 +318,14 @@ int calc_postfix(std::string input, TS_entry*& reloc_symb){
         token = input.substr(0, found_space);
         input.erase(0, found_space+1);
         if (!is_operation(token))
-            ops_stack.push(token);
+            ops_stack->push(token);
         else if (is_operation(token)){
 
-            std::string op2 = ops_stack.top();
-            ops_stack.pop();
+            std::string op2 = ops_stack->top();
+            ops_stack->pop();
 
-            std::string op1 = ops_stack.top();
-            ops_stack.pop();
+            std::string op1 = ops_stack->top();
+            ops_stack->pop();
 
             int iop1, iop2, iresult;
             TS_entry* symb1 = nullptr; 
@@ -347,24 +378,24 @@ int calc_postfix(std::string input, TS_entry*& reloc_symb){
             }
 
             std::string result = std::to_string(iresult);
-            ops_stack.push(result);
+            ops_stack->push(result);
         }
 
         if (found_space == std::string::npos) 
             break;
     }
 
-    std::string value = ops_stack.top();
-    ops_stack.pop();
+    std::string value = ops_stack->top();
+    ops_stack->pop();
 
-    int ivalue;
+    int ivalue = 0;
 
     // Will not be absolute when there is only one symbol to calculate
     if (is_absolute(value)) 
         ivalue = str_to_int(value);
     else if (exists_symbol(value)){ 
         ivalue = TS_entry::TS_entry_mapping[value]->getValue();
-        if (is_label_or_extern(value))
+        if (is_label_or_extern(value) && reloc_symb == nullptr)
             reloc_symb = TS_entry::TS_entry_mapping[value];
     }
     else 
@@ -378,7 +409,8 @@ bool is_operation(std::string op){
 }
 
 int calc_const_expr(std::string input, TS_entry*& reloc_symb){
-    return calc_postfix(infix_to_postfix(input), reloc_symb);
+    int ret = calc_postfix(infix_to_postfix(input), reloc_symb);
+    return ret;
 }
 
 int calc_const_expr_no_reloc(std::string input){
