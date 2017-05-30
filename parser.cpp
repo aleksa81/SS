@@ -38,9 +38,9 @@ void Parser::parse(std::string file_name){
         else if (Parser::is_org(line)) continue;
         else if (Parser::is_data_definition(line)) continue;
         else if (Parser::is_instruction(line)) continue;
-        else if (label_name == "")
+        else if (label_name.empty()) // if line is not label nor any directive/instruction
             Parser::error("Syntax error.");
-        else
+        else if (!label_name.empty() && !line.empty()) // if trash is found after label
             Parser::error("Syntax error.");
     }
 

@@ -8,7 +8,7 @@
 
 int main(){
 
-    Parser::getInstance().parse("machine_code_test");
+    Parser::getInstance().parse("reloc_test");
 
     //Line::print_all();
     TS_entry::print_TS();
@@ -19,7 +19,7 @@ int main(){
 
     Relocation::print_all();
 
-    TS_entry::print_machine_code();
+    //TS_entry::print_machine_code();
 
     // std::string reg = "";
     // int value = -1;

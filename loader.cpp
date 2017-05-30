@@ -336,8 +336,6 @@ void Loader::process_mem_dir(){
     *((int*)(Section::current->machine_code + Parser::location_counter)) |= MEMDIR;
     Loader::value = calc_const_expr(Loader::operand, Loader::reloc_symb);
 
-    std::cout << "memdir " << value << std::endl;
-
     Loader::adr_mode = MEMDIR;
 }
 
