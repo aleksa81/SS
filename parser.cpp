@@ -320,9 +320,7 @@ bool Parser::is_instruction(std::string &line){
     
         new Line(mnemonic, ops[0], ops[1], ops[2], instr_size, false);
         return true;
-    }else{
-        if (line != "RET")
-            Parser::error("Syntax error.");
+    }else if (line == "RET"){
 
         Parser::location_counter += 4;
         new Line("RET", "", "", "", 4, false);
