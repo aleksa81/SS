@@ -167,7 +167,7 @@ void Loader::load(){
                     Loader::process_pc_rel(REG1);
                 else if (is_immed(operand) && !is_store(mne) && !is_JZ(mne))
                     Loader::process_immed();
-                else if (is_mem_dir(operand))
+                else if (is_mem_dir(operand) && !is_immed(operand))
                     Loader::process_mem_dir();
                 else
                     Parser::error("Address mode mismatch.");
@@ -215,7 +215,7 @@ void Loader::load(){
                 if (reloc_symb != nullptr){
 
                     if (mne == "DB" || mne == "DW")
-                        Parser::error("Address needs 4B to be stored.");
+                        Parser::error("Address needs double word to be stored.");
 
                     for (int i=0;i<dup;i++){
                         if (reloc_symb->getScope() == SCOPE_GLOBAL){

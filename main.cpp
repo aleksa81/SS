@@ -8,7 +8,7 @@
 
 int main(){
 
-    Parser::getInstance().parse("tekst3");
+    Parser::getInstance().parse("reloc_test");
 
     Line::print_all();
     TS_entry::print();

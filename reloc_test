@@ -1,0 +1,64 @@
+ORG 0
+.text.1
+a:DD 12 DUP ?
+b:DD ?
+JMP $k                 ; pc rel - PC iz ORG, k iz ORG [-RELOC]
+JMP $c                 ; pc rel - PC iz ORG, c nije iz ORG + c je globalan [+RELOC]
+JMP $h                 ; pc rel - PC iz ORG, h nije iz ORG + h je lokalan [+RELOC]
+end1:
+
+ORG end1
+.text.2
+k:DW 48 DUP 4
+JMP $1234              ; pc rel - apsolutna adresa u ORG sekciji [-RELOC]
+end2:
+
+.global k,c,d          ; k definisano pa global, c global pa definisano, d je extern
+
+.text.3
+c:DD 3
+JMP $a                 ; pc rel - PC nije iz ORG, a je iz ORG + a je lokalan [+RELOC]
+e:JMP $1234            ; pc rel - apsolutna adresa u ne ORG sekciji [+RELOC]
+JMP $c                 ; pc rel - PC i c iz iste sekcije [-RELOC]
+
+.text.5
+ADD R1, R2, R3
+JMP $c                 ; pc rel - PC nije iz ORG, c nije iz ORG + c je globalan [+RELOC]
+JMP $e                 ; pc rel - PC nije iz ORG, e nije iz ORG + e je lokalan [+RELOC]
+JZ R1, k               ; mem dir - k iz ORG + k je globlan [-RELOC]
+h: JZ R1, c            ; mem dir - c nije iz ORG + c je globalan [+RELOC]
+JZ R1, a               ; mem dir - a iz ORG + a je lokalan [-RELOC]
+JZ R1, e               ; mem dir - e nije iz ORG + e je lokalan [+RELOC]
+JZ R15, $c             ; pc rel - PC nije iz ORG, c nije iz ORG + c je globalan [+RELOC]
+JZ R15, $e             ; pc rel - PC nije iz ORG, e nije iz ORG + e je lokalan [+RELOC]
+
+.text.4
+LOAD R1, $k            ; pc rel - PC nije iz ORG, k je iz ORG + k je globalan [+RELOC]
+LOAD R1, $b            ; pc rel - PC nije iz ORG, b je iz ORG + b je lokalan [+RELOC]
+LOAD R1, #k            ; immed - k je iz ORG + k je globalan [-RELOC]
+LOAD R1, #b            ; immed - b je iz ORG + b je lokalan [-RELOC] 
+LOAD R1, #c            ; immed - c nije iz ORG + c je globalan [+RELOC]
+LOAD R1, #e            ; immed - e nije iz ORG + e je lokalan [+RELOC]
+LOAD R1, #((e-c)/2+3)  ; immed - apsolutni argument [-RELOC]
+
+LOAD R1, #((e-c)/2+k)  ; immed - k je iz ORG + k je globalan [-RELOC]
+LOAD R1, #((e-c)/2+b)  ; immed - b je iz ORG + b je lokalan [-RELOC]
+LOAD R1, #((e-c)/2+c)  ; immed - c nije iz ORG + c je globalan [+RELOC]
+LOAD R1, #((e-c)/2+e)  ; immed - e nije iz ORG + e je lokalan [+RELOC]
+
+STORE R1, c            ; memdir - c nije iz ORG + c je global [+RELOC]
+STORE R1, $c           ; pc rel - PC nije iz ORG, c nije iz ORG + c je global [+RELOC]
+PUSH R1
+POP R2
+
+ORG end2
+.rodata
+x:
+DD 12 DUP ((e-c)/2+h)  ; 12*[+RELOC]
+DD c                   ; c nije iz ORG + c je globalan [+RELOC]
+DD e                   ; e nije iz ORG + e je lokalan [+RELOC]
+DD x                   ; x iz ORG [-RELOC]
+DD d                   ; d je extern [+RELOC]
+end3:
+
+.end
