@@ -231,12 +231,17 @@ void Loader::load(){
                 }
                 else{
                     if (mne == "DB"){
-                        for (int i = 0; i< dup;i++)
+                        for (int i = 0; i < dup;i++)
                             *(Section::current->machine_code + Parser::location_counter + i) = value;
                         
-                    }else if (mne == "DW")
-                        for (int i = 0; i< dup;i++){
+                    }
+                    else if (mne == "DW")
+                        for (int i = 0; i < dup;i++){
                             *((short*)(Section::current->machine_code + Parser::location_counter + i*2)) = value;
+                    }
+                    else if (mne == "DD"){
+                        for (int i=0;i < dup;i++)
+                            *((int*)(Section::current->machine_code + Parser::location_counter + i*4)) = value;
                     }
                 }
 
@@ -251,24 +256,25 @@ void Loader::load(){
             if (reloc_symb == nullptr && adr_mode == REGINDDISP){
 
                 if (Section::current->is_static == true){
-                    *((int*)(Section::current->machine_code + Parser::location_counter + 4)) = value - Parser::location_counter - 8;
-                }else{
+                    *((int*)(Section::current->machine_code + Parser::location_counter + 4)) = value - Parser::location_counter - Section::current->getValue() - 8;
+                }
+                else{
                     *((int*)(Section::current->machine_code + Parser::location_counter + 4)) = value - 4;
                     new Relocation(Section::current->getValue() + Parser::location_counter+4, reloc_type, nullptr, value - 4);
                 }
 
             }
-            else if (adr_mode == REGINDDISP){
+            else if (reloc_symb != nullptr && adr_mode == REGINDDISP){
 
                 if (reloc_symb->getSection()->getID() == Section::current->getID()){
-                    *((int*)(Section::current->machine_code + Parser::location_counter) + 4) = value - Parser::location_counter - 8;
+                    *((int*)(Section::current->machine_code + Parser::location_counter + 4)) = value - Parser::location_counter - 8;
                 }
                 else if (reloc_symb->getScope() == SCOPE_GLOBAL){
-                    *((int*)(Section::current->machine_code + Parser::location_counter) + 4) = -4;
+                    *((int*)(Section::current->machine_code + Parser::location_counter + 4)) = -4;
                     new Relocation(Section::current->getValue() + Parser::location_counter+4, reloc_type, reloc_symb, -4);
                 }
                 else{
-                    *((int*)(Section::current->machine_code + Parser::location_counter) + 4) = value - 4;
+                    *((int*)(Section::current->machine_code + Parser::location_counter + 4)) = value - 4;
                     new Relocation(Section::current->getValue() + Parser::location_counter+4, reloc_type, reloc_symb->getSection(), value - 4);
                 }
 
@@ -284,7 +290,10 @@ void Loader::load(){
                     new Relocation(Section::current->getValue() + Parser::location_counter+4, reloc_type, reloc_symb->getSection(), value);
                 }
             }
-
+            else if (reloc_symb == nullptr && (adr_mode == IMMED || adr_mode == MEMDIR)){
+                *((int*)(Section::current->machine_code + Parser::location_counter + 4)) = value;
+            }
+            
             Parser::location_counter += line->getSize(); // int* cast...
 
         }
@@ -292,10 +301,12 @@ void Loader::load(){
 }
 
 void Loader::process_reg_ind_disp(int regpos){
-    *((int*)(Section::current->machine_code + Parser::location_counter)) |= REGINDDISP;
+    *((int*)(Section::current->machine_code + Parser::location_counter)) |= REGIND;
     *((int*)(Section::current->machine_code + Parser::location_counter)) |= (regcode[Loader::reg]<<regpos);
-    if (!is_reg_ind(Loader::operand))
+    if (!is_reg_ind(Loader::operand)){
         *((int*)(Section::current->machine_code + Parser::location_counter +4)) = Loader::disp;
+        *((int*)(Section::current->machine_code + Parser::location_counter)) |= REGINDDISP;
+    }
     return;
 }
 
@@ -324,6 +335,8 @@ void Loader::process_immed(){
 void Loader::process_mem_dir(){
     *((int*)(Section::current->machine_code + Parser::location_counter)) |= MEMDIR;
     Loader::value = calc_const_expr(Loader::operand, Loader::reloc_symb);
+
+    std::cout << "memdir " << value << std::endl;
 
     Loader::adr_mode = MEMDIR;
 }

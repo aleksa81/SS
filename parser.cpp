@@ -40,6 +40,8 @@ void Parser::parse(std::string file_name){
         else if (Parser::is_instruction(line)) continue;
         else if (label_name == "")
             Parser::error("Syntax error.");
+        else
+            Parser::error("Syntax error.");
     }
 
     if (was_ended == false) 

@@ -1,0 +1,24 @@
+.text.1
+DD 4
+DD 4
+b:DD 3
+
+ORG 20
+.text
+;ADD R1, R2, R3  ; ok
+;SUB R3, R4, R5  ; ok
+
+;PUSH R1          ; ok
+;POP R1           ; ok
+
+;.global b
+
+
+a:LOAD R1, 0xfffff
+
+;STORE R2, R4
+
+
+
+
+.end

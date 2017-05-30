@@ -62,7 +62,8 @@ public:
     bool is_constant();
 
     static bool is_key_word(const std::string &str);
-    static void print();
+    static void print_TS();
+    static void print_machine_code();
     static void init();
 
     virtual std::string to_string(){

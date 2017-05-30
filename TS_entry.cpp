@@ -2,6 +2,7 @@
 #include "util.h"
 #include "mchunk.h"
 #include "parser.h"
+#include <bitset>
 
 #define MAX_SEG_NAME_LEN (15)
 #define MAX_SYM_NAME_LEN (15)
@@ -277,7 +278,7 @@ std::string Symbol::to_string(){
            scope;
 }
 
-void TS_entry::print(){
+void TS_entry::print_TS(){
 
     //std::cout << "Number of sections: " << Section::num_of_sections << "."<<std::endl;
     //std::cout << std::endl;
@@ -290,5 +291,22 @@ void TS_entry::print(){
     std::cout << std::endl;
     for (TS_entry* i = Symbol::head; i != nullptr; i = i->next){
         std::cout << i->to_string() << std::endl;
+    }
+}
+
+void TS_entry::print_machine_code(){
+
+    std::cout << "MACHINE CODE" << std::endl;
+    for (TS_entry* s = Section::head; s != nullptr; s = s->next){
+
+        std::cout << s->getName() << std::endl;
+      
+        for (size_t i=0;i<((Section*)s)->getSize(); i+=4){
+            for (int j=0;j<4;j++)
+                std::cout << std::bitset<8>(((Section*)s)->machine_code[i+3-j]) << " ";
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+        std::cout << std::endl;
     }
 }

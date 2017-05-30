@@ -8,16 +8,18 @@
 
 int main(){
 
-    Parser::getInstance().parse("reloc_test");
+    Parser::getInstance().parse("machine_code_test");
 
-    Line::print_all();
-    TS_entry::print();
+    //Line::print_all();
+    TS_entry::print_TS();
 
     //std::cout << calc_const_expr_no_reloc(" (x - y) +3 ") << std::endl;
 
     Loader::getInstance().load();
 
     Relocation::print_all();
+
+    TS_entry::print_machine_code();
 
     // std::string reg = "";
     // int value = -1;
