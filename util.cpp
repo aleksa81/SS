@@ -1,6 +1,6 @@
 #include "util.h"
 #include "TS_entry.h"
-#include <cstdlib> // strtol
+#include <cstdlib> 
 #include <set>
 #include <iostream>
 #include <stack>
@@ -144,15 +144,15 @@ bool is_const_expr(const std::string &str){ // TODO
     return true;
 }
 
-int str_to_int(const std::string &str){
+long str_to_int(const std::string &str){
 
     // c_str() converts string to const char* 
-    if (is_binary(str)) 
-        return strtol(str.substr(2, std::string::npos).c_str(), nullptr, 2);
+    if (is_binary(str))
+        return std::stoul(str.substr(2, std::string::npos).c_str(), nullptr, 2); 
     if (is_hexadecimal(str)) 
-        return strtol(str.substr(2, std::string::npos).c_str(), nullptr, 16);
+        return std::stoul(str.substr(2, std::string::npos).c_str(), nullptr, 16);
     if (is_decimal(str)) 
-        return strtol(str.c_str(), nullptr, 10);
+        return std::stoul(str.c_str(), nullptr, 10);
     if (str[0]=='\'' && str[2] == '\'' && isalpha(str[1]))
         return str[1];
 

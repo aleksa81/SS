@@ -14,9 +14,9 @@ ORG 20
 ;.global b
 
 
-a:LOAD R1, 0xfffff
+a:LOAD R1, 0xffffffff
 
-STORE R2, 1234
+STORE R2, R4
 
 
 

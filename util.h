@@ -43,7 +43,7 @@ bool is_absolute(const std::string &str);
 
 bool is_const_expr(const std::string &str);
 
-int str_to_int(const std::string &str);
+long str_to_int(const std::string &str);
 
 size_t get_instruction_size(const std::string &mne,
                             const std::string &op1,

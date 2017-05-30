@@ -96,8 +96,6 @@ void TS_entry::init(){
         }
     }
 
-    std::cout << std::endl;
-
     // assign IDs to symbols 
     for (TS_entry* i = Symbol::head; i != nullptr;i = i->next){
         i->setID(++ID);
@@ -306,7 +304,6 @@ void TS_entry::print_machine_code(){
                 std::cout << std::bitset<8>(((Section*)s)->machine_code[i+3-j]) << " ";
             std::cout << std::endl;
         }
-        std::cout << std::endl;
         std::cout << std::endl;
     }
 }

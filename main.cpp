@@ -21,6 +21,8 @@ int main(){
 
     TS_entry::print_machine_code();
 
+    //std::cout << str_to_int("0b11111111111111111111111111111111") << std::endl;
+
     // std::string reg = "";
     // int value = -1;
     // std::cout << is_reg_ind_disp("[ R1 + 3 + 4- 4 ]", reg, value)<<std::endl;
