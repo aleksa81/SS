@@ -10,7 +10,7 @@ int main(){
 
     Parser::getInstance().parse("machine_code_test");
 
-    //Line::print_all();
+    Line::print_all();
     //TS_entry::print_TS();
 
     //std::cout << calc_const_expr_no_reloc(" (x - y) +3 ") << std::endl;

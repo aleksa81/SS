@@ -199,8 +199,13 @@ bool Parser::is_org(std::string &line){
         strip_off_spaces(value);
         int ivalue;
 
-        if (is_absolute(value)) ivalue = str_to_int(value);
-        else ivalue = calc_const_expr_no_reloc(value);
+        if (is_absolute(value)) 
+            ivalue = str_to_int(value);
+        else 
+            ivalue = calc_const_expr_no_reloc(value);
+
+        if (ivalue < 0)
+            Parser::error("ORG argument must be positive.");
 
         Parser::ORG_VALUE = ivalue;
         Parser::ORG_FLAG = true;
@@ -314,6 +319,13 @@ bool Parser::is_instruction(std::string &line){
         Parser::location_counter += instr_size;
     
         new Line(mnemonic, ops[0], ops[1], ops[2], instr_size, false);
+        return true;
+    }else{
+        if (line != "RET")
+            Parser::error("Syntax error.");
+
+        Parser::location_counter += 4;
+        new Line("RET", "", "", "", 4, false);
         return true;
     }
     return false;

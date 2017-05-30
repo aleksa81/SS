@@ -11,12 +11,14 @@ ORG 20
 ;PUSH R1          ; ok
 ;POP R1           ; ok
 
-;.global b
+.global b
 
 
 a:LOAD R1, 0xffffffff
 
-STORE R2, R4
+STORE R2, $b
+
+RET
 
 
 
