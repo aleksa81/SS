@@ -1,3 +1,4 @@
+ORG 0
 .text.1
 DD 4
 DD 4
@@ -14,11 +15,13 @@ ORG 20
 .global b
 
 
-a:LOAD R1, 0xffffffff
+;a:LOAD R1, 0xffffffff
 
-STORE R2, $b
+;STORE R2, $b
 
-RET
+JZ R1, $b
+
+;RET
 
 
 

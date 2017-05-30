@@ -29,7 +29,7 @@ void Parser::parse(std::string file_name){
 
         if (line.empty()) continue;
 
-        Parser::get_label(line);
+        Parser::get_label(line); // removes label from line
 
         if (Parser::is_end(line)) break;
         else if (Parser::is_global(line)) continue;
