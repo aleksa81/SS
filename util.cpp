@@ -39,10 +39,9 @@ bool is_binaries(const std::string &str){
 }
 
 bool is_alphanum(const std::string &str){
-     for (size_t i = 0;i<str.length();i++)
-        if (!isalnum(str[i]) && str[i] != '_') return false;
-     
-     return true;
+    for (size_t i = 0;i<str.length();i++)
+        if (!isalnum(str[i]) && str[i] != '_') return false; 
+    return true;
 }
 
 void strip_off_spaces(std::string &str){
@@ -85,7 +84,7 @@ std::string get_reg(const std::string& str){
 
 bool is_mem_dir(const std::string &op){ 
     if (op[0] != '$' && op[0] != '#')return true;
-    return true;
+    return false;
 } 
 
 bool is_pc_rel(const std::string &op){

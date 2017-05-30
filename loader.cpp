@@ -167,7 +167,7 @@ void Loader::load(){
                     Loader::process_pc_rel(REG1);
                 else if (is_immed(operand) && !is_store(mne) && !is_JZ(mne))
                     Loader::process_immed();
-                else if (is_mem_dir(operand) && !is_immed(operand))
+                else if (is_mem_dir(operand))
                     Loader::process_mem_dir();
                 else
                     Parser::error("Address mode mismatch.");

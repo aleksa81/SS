@@ -16,7 +16,7 @@ ORG 20
 
 a:LOAD R1, 0xfffff
 
-;STORE R2, R4
+STORE R2, 1234
 
 
 

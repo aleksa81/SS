@@ -57,8 +57,6 @@ public:
     static void process_store(const std::string &str);
     static void process_load(const std::string &str);
 
-
-
 };
 
 #endif
