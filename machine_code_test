@@ -1,10 +1,10 @@
-ORG 0
+;ORG 0
 .text.1
 DD 4
-DD 4
+x:DD 4
 b:DD 3
 
-ORG 20
+;ORG 20
 .text
 ;ADD R1, R2, R3  ; ok
 ;SUB R3, R4, R5  ; ok
@@ -12,14 +12,28 @@ ORG 20
 ;PUSH R1          ; ok
 ;POP R1           ; ok
 
-.global b
+;.global b
 
+a:
+;LOAD R1, 0xffffffff     ; mem dir
+;LOAD R1, #0xffffffff    ; immed
+;LOAD R1, b              ; mem dir
+;LOAD R1, #b             ; immed
+;LOAD R1, $b             ; pc rel
+;LOAD R1, [R2+a]         ; reg ind disp, a je iz ORG
+;LOAD R1, R3             ; reg dir
+;LOAD R1, [R2]           ; reg ind
 
-;a:LOAD R1, 0xffffffff
-
+;STORE R2, b
 ;STORE R2, $b
+;STORE R2, [R3+x]
 
-JZ R1, $b
+;JMP $x
+JMP [R3]
+;JMP x
+
+
+;JZ R1, $b
 
 ;RET
 

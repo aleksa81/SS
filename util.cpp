@@ -97,23 +97,26 @@ bool is_immed(const std::string &op){
     return true;
 }
 
-bool is_reg_ind_disp(const std::string &op, std::string &reg, int &value){ 
+bool is_reg_ind_disp(const std::string &op, std::string &reg, std::string &disp){ 
     if (op[0]=='[' && op[op.length()-1] == ']'){
 
         size_t found_plus = op.find("+");
         size_t found_bracket = op.find("]");
 
+        if (found_bracket == std::string::npos)
+            Parser::error("] Missing.");
+
         if (found_plus != std::string::npos){
             reg = op.substr(1, found_plus - 1);
-            std::string svalue = op.substr(found_plus+1, found_bracket - found_plus -1);
-            value = calc_const_expr_no_reloc(svalue);
+            disp = op.substr(found_plus+1, found_bracket - found_plus -1);
         }
         else{
             reg = op.substr(1, found_bracket - 1);
-            value = 0;
+            disp = "";
         }
 
         strip_off_spaces(reg);
+        strip_off_spaces(disp);
         if(regs.find(reg) == regs.end())
             return false;
         return true;

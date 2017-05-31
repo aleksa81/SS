@@ -48,6 +48,11 @@ LOAD R1, #((e-c)/2+e)  ; immed - e nije iz ORG + e je lokalan [+RELOC]
 
 STORE R1, c            ; memdir - c nije iz ORG + c je global [+RELOC]
 STORE R1, $c           ; pc rel - PC nije iz ORG, c nije iz ORG + c je global [+RELOC]
+
+STORE R2, [R3+b]       ; reg ind disp - b iz ORG [-RELOC]
+STORE R2, [R3+c]       ; reg ind disp - c nije iz ORG + c je globalan [+RELOC]
+STORE R2, [R3+e]       ; reg ind disp - e nije iz ORG + e je lokalan [+RELOC]
+
 PUSH R1
 POP R2
 

@@ -16,7 +16,7 @@ private:
     static int value;
     static TS_entry* reloc_symb;
     static std::string reg;
-    static int disp;
+    static std::string disp;
     static int adr_mode;
 
     static std::unordered_map<std::string, int> opcode;

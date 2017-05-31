@@ -31,7 +31,7 @@ bool is_pc_rel(const std::string &op); // addressing
 
 bool is_immed(const std::string &op); // addressing
 
-bool is_reg_ind_disp(const std::string &op, std::string &reg, int &value); // addressing
+bool is_reg_ind_disp(const std::string &op, std::string &reg, std::string &disp); // addressing
 
 bool is_binary(const std::string &str);
 

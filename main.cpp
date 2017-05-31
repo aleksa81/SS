@@ -11,9 +11,8 @@ int main(){
     Parser::getInstance().parse("machine_code_test");
 
     Line::print_all();
-    //TS_entry::print_TS();
+    TS_entry::print_TS();
 
-    //std::cout << calc_const_expr_no_reloc(" (x - y) +3 ") << std::endl;
 
     Loader::getInstance().load();
 
@@ -21,13 +20,22 @@ int main(){
 
     TS_entry::print_machine_code();
 
+
+    // std::string reg;
+    // std::string disp;
+    // bool a = is_reg_ind_disp("[R1+b]", reg, disp);
+    // std::cout << reg << " " << disp << std::endl;
+
+    // int i =1;
+    // if (*(char*)&i == 1)
+    //     std::cout << "Little endian" << std::endl;
+    // else
+    //     std::cout << "Big endian" << std::endl;
+
+
+
+
     //std::cout << str_to_int("0b11111111111111111111111111111111") << std::endl;
-
-    // std::string reg = "";
-    // int value = -1;
-    // std::cout << is_reg_ind_disp("[ R1 + 3 + 4- 4 ]", reg, value)<<std::endl;
-    // std::cout << reg << " " << value << std::endl;
-
 
     // TS_entry* tse = nullptr;
     // std::string s = " 5  ";
