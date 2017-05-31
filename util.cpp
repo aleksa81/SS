@@ -5,6 +5,26 @@
 #include <iostream>
 #include <stack>
 
+std::unordered_map<std::string, std::string> hexmap{
+    {"0000",   "0"},
+    {"0001",   "1"},
+    {"0010",   "2"},
+    {"0011",   "3"},
+    {"0100",   "4"},
+    {"0101",   "5"},
+    {"0110",   "6"},
+    {"0111",   "7"},
+    {"1000",   "8"},
+    {"1001",   "9"},
+    {"1010",   "A"},
+    {"1011",   "B"},
+    {"1100",   "C"},
+    {"1101",   "D"},
+    {"1110",   "E"},
+    {"1111",   "F"}
+
+};
+
 // *check first operand to get instruction size (32/64 bit)
 // have one operand
 std::set<std::string> check_first_operand_mnemonics = 
@@ -88,7 +108,8 @@ bool is_mem_dir(const std::string &op){
 } 
 
 bool is_pc_rel(const std::string &op){
-    if (op[0]!='$') return false;
+
+    if (op[0] != '$') return false;
     return true;
 }
 
@@ -98,6 +119,8 @@ bool is_immed(const std::string &op){
 }
 
 bool is_reg_ind_disp(const std::string &op, std::string &reg, std::string &disp){ 
+    if (op.empty())
+        return false;
     if (op[0]=='[' && op[op.length()-1] == ']'){
 
         size_t found_plus = op.find("+");
@@ -140,7 +163,7 @@ bool is_decimal(const std::string &str){
 
 bool is_absolute(const std::string &str){
     return is_decimal(str) || is_binary(str) || 
-       is_hexadecimal(str) || (str[0]=='\'' && str[2] == '\'' && isalpha(str[1]));
+       is_hexadecimal(str) || (str[0]=='\'' && str[2] == '\'');
 }
 
 bool is_const_expr(const std::string &str){ // TODO
@@ -156,7 +179,7 @@ long str_to_int(const std::string &str){
         return std::stoul(str.substr(2, std::string::npos).c_str(), nullptr, 16);
     if (is_decimal(str)) 
         return std::stoul(str.c_str(), nullptr, 10);
-    if (str[0]=='\'' && str[2] == '\'' && isalpha(str[1]))
+    if (str[0]=='\'' && str[2] == '\'')
         return str[1];
 
     Parser::error("String to int conversion failed.");
@@ -197,14 +220,19 @@ size_t get_instruction_size(const std::string &mne,
             if (!is_reg_dir(op1)) return 0;
             return 4;
         }
-        else{
+        else if (mne == "NOT"){
+            if (op1.empty() || op2.empty()) return 0;
+            if (!op3.empty()) return 0;
+            if (is_reg_dir(op1) && is_reg_dir(op2)) return 4; 
 
+        }
+        else
             // arithmetic and logic instructions have three operands
             if (op1.empty() || op2.empty() || op3.empty()) return 0;
             if (!is_reg_dir(op1) || !is_reg_dir(op2) || !is_reg_dir(op3)) return 0;
             return 4;
         }
-    }
+
     return 8;
 }
 
@@ -395,7 +423,8 @@ int calc_postfix(std::string input, TS_entry*& reloc_symb){
     // Will not be absolute when there is only one symbol to calculate
     if (is_absolute(value)) 
         ivalue = str_to_int(value);
-    else if (exists_symbol(value)){ 
+    else if (exists_symbol(value)){
+
         ivalue = TS_entry::TS_entry_mapping[value]->getValue();
         if (is_label_or_extern(value) && reloc_symb == nullptr)
             reloc_symb = TS_entry::TS_entry_mapping[value];
@@ -446,4 +475,10 @@ bool are_constants(const std::string& str1, const std::string& str2){
 
 bool exists_symbol(const std::string& str){
     return TS_entry::TS_entry_mapping.find(str) != TS_entry::TS_entry_mapping.end();
+}
+
+std::string str_to_hex(const std::string &str){
+    if (str.length() != 8)
+        return "";
+    return hexmap[str.substr(0,4)] + hexmap[str.substr(4,4)];
 }

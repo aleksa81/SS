@@ -231,11 +231,15 @@ bool Parser::is_data_definition(std::string &line){
         if (found != std::string::npos){
             data_rept = line.substr(2, found-2);
             data_value = line.substr(found+4, std::string::npos);
-        }else
+        }
+        else
             data_value = line.substr(3, std::string::npos);
         
         strip_off_spaces(data_value);
         strip_off_spaces(data_rept);
+
+        if (data_value.find(" ") != std::string::npos)
+            Parser::error("DUP missing.");
 
         if (Section::current->getType() == SECTION_BSS && data_value != "?")
             Parser::error("Data definiton in .bss must have '?' value.");
@@ -285,6 +289,9 @@ bool Parser::is_instruction(std::string &line){
 
         // Max of 3 operands are allowed, ops[i] will be empty if less.
         std::string ops[3];
+
+        for (int i=0;i<3;i++)
+            ops[i] = "";
 
         // Parsing operands:
         //   - Split string with comma separator, 

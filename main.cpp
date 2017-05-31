@@ -14,11 +14,17 @@ int main(){
     TS_entry::print_TS();
 
 
+
     Loader::getInstance().load();
 
     Relocation::print_all();
 
     TS_entry::print_machine_code();
+
+
+    //std::cout << "OVDE" << std::endl;
+
+
 
 
     // std::string reg;

@@ -14,7 +14,7 @@ Line::Line(std::string mnemonic,
     this->section = Section::current;
     ops[0] = op1;
     ops[1] = op2;
-    ops[2] = op3; 
+    ops[2] = op3;
     this->size = size;
 
     this->is_section = is_section;

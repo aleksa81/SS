@@ -1,8 +1,10 @@
-;ORG 0
+ORG 0
 .text.1
 DD 4
-x:DD 4
-b:DD 3
+x:DW 0xffee
+DB 0xff
+DD 0xff
+DW 12 DUP 3
 
 ;ORG 20
 .text
@@ -13,6 +15,8 @@ b:DD 3
 ;POP R1           ; ok
 
 ;.global b
+
+.global print
 
 a:
 ;LOAD R1, 0xffffffff     ; mem dir
@@ -26,18 +30,27 @@ a:
 
 ;STORE R2, b
 ;STORE R2, $b
-;STORE R2, [R3+x]
+STORE R2, [R3+x]
+
+JZ R1, $print
+
+NOT R1, R3
+
+;INT R1
 
 ;JMP $x
-JMP [R3]
+;JMP [R3]
 ;JMP x
-
+;JZ R1, $x
+;JMP $x
+;JMP R3
+;JMP x
+;JZ R1, $x
+;JZ R1, R3
+;JZ R1, x
 
 ;JZ R1, $b
 
 ;RET
-
-
-
 
 .end

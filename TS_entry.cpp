@@ -3,6 +3,7 @@
 #include "mchunk.h"
 #include "parser.h"
 #include <bitset>
+#include <iomanip>
 
 #define MAX_SEG_NAME_LEN (15)
 #define MAX_SYM_NAME_LEN (15)
@@ -242,15 +243,34 @@ std::string Section::to_string(){
     if (this->isStatic()) flags.append("S");
     else flags.append("-");
 
-    return right_padding("SEG", 4) +
-           left_padding(std::to_string(this->ID), 4) + 
-           " " +
-           right_padding(this->name, MAX_SEG_NAME_LEN) +
-           left_padding(std::to_string(this->ID), 4) +
-           left_padding(std::to_string(this->value), 7) +
-           left_padding(std::to_string(this->size), 7) +
-           " " +
-           flags;
+    std::string ret;
+
+#ifdef PADDING
+    ret = right_padding("SEG", 4) +
+          left_padding(std::to_string(this->ID), 4) + 
+          " " +
+          right_padding(this->name, MAX_SEG_NAME_LEN) +
+          left_padding(std::to_string(this->ID), 4) +
+          left_padding(std::to_string(this->value), 7) +
+          left_padding(std::to_string(this->size), 7) +
+          " " +
+          flags;
+#else
+    ret = "SEG " +
+          std::to_string(this->ID) + 
+          " " +
+          this->name +
+          " " +
+          std::to_string(this->ID) + 
+          " " +
+          std::to_string(this->value) + 
+          " " +
+          std::to_string(this->size) +
+          " " +
+          flags;
+#endif
+
+    return ret;
 }
 
 std::string Symbol::to_string(){
@@ -266,7 +286,10 @@ std::string Symbol::to_string(){
     if (this->scope_flag == SCOPE_GLOBAL) scope = "G";
     else scope = "L";
 
-    return right_padding("SYM", 4) +
+    std::string ret;
+
+#ifdef PADDING
+    ret = right_padding("SYM", 4) +
            left_padding(std::to_string(this->ID), 4) + 
            " " +
            right_padding(this->name, MAX_SYM_NAME_LEN) +
@@ -274,6 +297,20 @@ std::string Symbol::to_string(){
            left_padding(std::to_string(this->value), 7) +
            " " +
            scope;
+#else
+    ret = "SYM " +
+          std::to_string(this->ID) + 
+          " " +
+          this->name +
+          " " +
+          my_section +
+          " " +
+          std::to_string(this->value) +
+          " " +
+          scope;
+#endif
+
+    return ret;
 }
 
 void TS_entry::print_TS(){
@@ -294,15 +331,68 @@ void TS_entry::print_TS(){
 
 void TS_entry::print_machine_code(){
 
+    int is_little_endian = 0;
+
+    int i =1;
+    if (*(char*)&i == 1)
+        is_little_endian = 0; // is little endian: =0 for little endian print, =1 for big endian
+    else
+        is_little_endian = 1; // is big endian: =1 for little endian print, =0 for big endian
+
     std::cout << "MACHINE CODE" << std::endl;
     for (TS_entry* s = Section::head; s != nullptr; s = s->next){
 
         std::cout << s->getName() << std::endl;
+
+        Line* line = ((Section*)s)->line_head;
+        size_t dsize = 0;
+        size_t drept = 0;
+        size_t dbase = 0;
       
-        for (size_t i=0;i<((Section*)s)->getSize(); i+=4){
-            for (int j=0;j<4;j++)
-                std::cout << std::bitset<8>(((Section*)s)->machine_code[i+3-j]) << " ";
-            std::cout << std::endl;
+        while(line != nullptr){
+            if (line->mnemonic == "DD"){
+                dsize = 4;
+                drept = str_to_int(line->ops[0]);
+            }
+            else if (line->mnemonic == "DW"){
+                dsize = 2;
+                drept = str_to_int(line->ops[0]);
+            }
+            else if (line->mnemonic == "DB"){
+                dsize =1;
+                drept = str_to_int(line->ops[0]);
+            }
+            else{
+                dsize = 4;
+                drept = line->getSize() / 4;
+            }
+
+            //std::cout << "data size: " << dsize << " rept: " <<drept <<std::endl;
+#ifdef BINARY_MACHINE_CODE
+            for (size_t i = 0; i < drept; i++){
+                for (size_t j = 0; j < dsize; j++){
+                    std::bitset<8> bs(((Section*)s)->machine_code
+                        [dbase + (i+is_little_endian*1)*dsize-(1+j)*is_little_endian + j*(1-is_little_endian)]);
+                    std::cout << bs.to_string()<< " ";
+                }
+                std::cout << std::endl;
+            }
+#else
+            for (size_t i = 0; i < drept; i++){
+                for (size_t j = 0; j < dsize; j++){
+                    std::bitset<8> bs(((Section*)s)->machine_code
+                        [dbase + (i+is_little_endian*1)*dsize-(1+j)*is_little_endian + j*(1-is_little_endian)]);
+                    std::string bsstring = bs.to_string();
+                    std::cout << str_to_hex(bsstring) << " ";
+                }
+                    
+                std::cout << std::endl;
+            }
+#endif
+
+            dbase += dsize*drept;
+
+            line = line->next;
         }
         std::cout << std::endl;
     }

@@ -31,13 +31,31 @@ std::string Relocation::to_string(){
     else 
         target = this->target->getName();
 
-    return left_padding(std::to_string(this->offset), 4) + 
-           " " +
-           right_padding(this->type,3) + 
-           " " +
-           right_padding(target, 15) +
-           " " +
-           left_padding(std::to_string(this->adr_field_value), 4);
+    std::string ret;
+
+#ifdef PADDING
+    ret = 
+        left_padding(std::to_string(this->offset), 10) + 
+        " " +
+        right_padding(this->type, 3) + 
+        " " +
+        right_padding(target, 15) ;
+        // +
+        // " " +
+        // left_padding(std::to_string(this->adr_field_value), 10);
+#else
+    ret = std::to_string(this->offset) + 
+        " " +
+        this->type + 
+        " " +
+        target ;
+        // +
+        // " " +
+        // std::to_string(this->adr_field_value);
+#endif
+    return ret;
+
+
 }
 
 void Relocation::print_all(){

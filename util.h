@@ -3,6 +3,9 @@
 #include <string>
 #include <vector>
 
+#define PADDING
+//#define BINARY_MACHINE_CODE
+
 class TS_entry;
 
 bool is_digits(const std::string &str);
@@ -82,5 +85,7 @@ bool are_from_same_section_labels(const std::string &l1,
 bool exists_symbol(const std::string& str);
 
 std::string get_reg(const std::string& str);
+
+std::string str_to_hex(const std::string &str);
 
 #endif

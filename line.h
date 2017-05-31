@@ -38,6 +38,7 @@ public:
     static void print_all();
 
     friend class Loader;
+    friend class TS_entry;
 };
 
 #endif

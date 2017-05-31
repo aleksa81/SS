@@ -11,4 +11,3 @@ program: $(OBJ)
 clean:
 	rm -f *.o
 	rm -f program
-
