@@ -24,9 +24,9 @@ void ObjFile::make(std::string file_name){
 
 
         output << "SEG " << i->ID << "" << i->getName() << " " << i->ID << 
-               " 0x" << std::setfill('0') << std::setw(8) << std::hex << i->getValue() <<
-               " 0x" << std::setfill('0') << std::setw(8) << std::hex << ((Section*)i)->getSize() << " " <<
-               flags << std::endl;
+                  " 0x" << std::setfill('0') << std::setw(8) << std::hex << i->getValue() <<
+                  " 0x" << std::setfill('0') << std::setw(8) << std::hex << ((Section*)i)->getSize() << " " <<
+                  flags << std::endl;
     }
 
     for (TS_entry* i = Symbol::head; i != nullptr; i = i->next){
@@ -68,7 +68,7 @@ void ObjFile::make(std::string file_name){
             continue;
 
         if(((Section*)s)->reloc_head != nullptr)
-            output << "#" << s->getName() << std::endl;
+            output << "#rel" << s->getName() << std::endl;
 
         // Print all relocation for current section
         for (Relocation* i = ((Section*)s)->reloc_head; i != nullptr; i=i->next){
