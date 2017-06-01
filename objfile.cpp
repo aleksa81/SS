@@ -42,7 +42,7 @@ void ObjFile::make(std::string file_name){
 	    if (i->scope_flag == SCOPE_GLOBAL) scope = "G";
 	    else scope = "L";
 
-        output << "SYM " << i->getID() << " " << i->getName() << " " << my_section <<
+        output << "SYM " << std::dec <<i->getID() << " " << i->getName() << " " << my_section <<
         	      " 0x" << std::setfill('0') << std::setw(8) << std::hex << (unsigned)i->getValue() <<
         	      " " << scope << std::endl;
     }
@@ -80,7 +80,7 @@ void ObjFile::make(std::string file_name){
 		        target = i->target->getID();
 
             output << "0x" << std::setfill('0') << std::setw(8) << std::hex << i->offset <<
-            	      " " << i->type << " " << target << std::endl;
+            	      " " << i->type << " " << std::dec <<target << std::endl;
         }
 
         output << s->getName() << std::endl;
