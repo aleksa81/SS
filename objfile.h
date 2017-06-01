@@ -7,11 +7,11 @@
 
 class ObjFile{
 private:
-	std::ofstream output; 
+    std::ofstream output; 
 
-	ObjFile(){}
+    ObjFile(){}
 public:
-	 static ObjFile& getInstance(){
+     static ObjFile& getInstance(){
 
         // initialized only once (on first encounter)
         // deleted when program terminates

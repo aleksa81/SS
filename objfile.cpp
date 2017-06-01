@@ -8,46 +8,46 @@
 
 void ObjFile::make(std::string file_name){
 
-	output.open(file_name);
+    output.open(file_name);
 
-	output << "#TabelaSimbola" << std::endl;
+    output << "#TabelaSimbola" << std::endl;
 
     for (TS_entry* i = Section::head; i != nullptr; i = i->next){
-    	std::string flags;
-	    if (i->type == SECTION_DATA) flags = "WPA";
-	    else if (i->type == SECTION_RODATA) flags = "RPA";
-	    else if (i->type == SECTION_TEXT) flags = "XPA";
-	    else flags = "W-A";
+        std::string flags;
+        if (i->type == SECTION_DATA) flags = "WPA";
+        else if (i->type == SECTION_RODATA) flags = "RPA";
+        else if (i->type == SECTION_TEXT) flags = "XPA";
+        else flags = "W-A";
 
-	    if (((Section*)i)->isStatic()) flags.append("S");
-	    else flags.append("-");
+        if (((Section*)i)->isStatic()) flags.append("S");
+        else flags.append("-");
 
 
         output << "SEG " << i->ID << "" << i->getName() << " " << i->ID << 
                " 0x" << std::setfill('0') << std::setw(8) << std::hex << i->getValue() <<
-        	   " 0x" << std::setfill('0') << std::setw(8) << std::hex << ((Section*)i)->getSize() << " " <<
-        	   flags << std::endl;
+               " 0x" << std::setfill('0') << std::setw(8) << std::hex << ((Section*)i)->getSize() << " " <<
+               flags << std::endl;
     }
 
     for (TS_entry* i = Symbol::head; i != nullptr; i = i->next){
-    	std::string my_section;
-	    if (i->type == SYMBOL_EXTERN) 
-	        my_section = "0";
-	    else if (i->type == SYMBOL_CONSTANT || i->section->is_static == true) 
-	        my_section = "-1";
-	    else 
-	        my_section = std::to_string(i->section->ID);
+        std::string my_section;
+        if (i->type == SYMBOL_EXTERN) 
+            my_section = "0";
+        else if (i->type == SYMBOL_CONSTANT || i->section->is_static == true) 
+            my_section = "-1";
+        else 
+            my_section = std::to_string(i->section->ID);
 
-	    std::string scope;
-	    if (i->scope_flag == SCOPE_GLOBAL) scope = "G";
-	    else scope = "L";
+        std::string scope;
+        if (i->scope_flag == SCOPE_GLOBAL) scope = "G";
+        else scope = "L";
 
         output << "SYM " << std::dec <<i->getID() << " " << i->getName() << " " << my_section <<
-        	      " 0x" << std::setfill('0') << std::setw(8) << std::hex << (unsigned)i->getValue() <<
-        	      " " << scope << std::endl;
+                  " 0x" << std::setfill('0') << std::setw(8) << std::hex << (unsigned)i->getValue() <<
+                  " " << scope << std::endl;
     }
 
-	/* -------------------------------------------------------------------------------------- */
+    /* -------------------------------------------------------------------------------------- */
     /* ------------------------------------- RELOCATION ------------------------------------- */
     /* -------------------------------------------------------------------------------------- */
 
@@ -63,24 +63,24 @@ void ObjFile::make(std::string file_name){
 
     for (TS_entry* s = Section::head; s != nullptr; s = s->next){
 
-    	// bss section doesn't have data in obj file
-    	if (s->getType()==SECTION_BSS)
-    		continue;
+        // bss section doesn't have data in obj file
+        if (s->getType()==SECTION_BSS)
+            continue;
 
-    	if(((Section*)s)->reloc_head != nullptr)
+        if(((Section*)s)->reloc_head != nullptr)
             output << "#" << s->getName() << std::endl;
 
         // Print all relocation for current section
         for (Relocation* i = ((Section*)s)->reloc_head; i != nullptr; i=i->next){
 
-	        unsigned target;
-		    if (i->target == nullptr)
-		        target = 0;
-		    else 
-		        target = i->target->getID();
+            unsigned target;
+            if (i->target == nullptr)
+                target = 0;
+            else 
+                target = i->target->getID();
 
             output << "0x" << std::setfill('0') << std::setw(8) << std::hex << i->offset <<
-            	      " " << i->type << " " << std::dec <<target << std::endl;
+                      " " << i->type << " " << std::dec <<target << std::endl;
         }
 
         output << s->getName() << std::endl;
@@ -122,9 +122,9 @@ void ObjFile::make(std::string file_name){
                     byte_cntr++;
 
                     if (byte_cntr == 16){
-	                	output << std::endl;
-	                	byte_cntr = 0;
-                	}
+                        output << std::endl;
+                        byte_cntr = 0;
+                    }
                 }
             }
 
@@ -133,10 +133,10 @@ void ObjFile::make(std::string file_name){
             line = line->next;
         }
         if (byte_cntr != 0)
-        	output << std::endl;
+            output << std::endl;
     }
 
     output << "#end" << std::endl;
 
-	output.close(); 
+    output.close(); 
 }
