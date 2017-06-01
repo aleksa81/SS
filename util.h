@@ -2,9 +2,10 @@
 #define UTIL_
 #include <string>
 #include <vector>
-
-#define PADDING
-//#define BINARY_MACHINE_CODE
+#include <cstdlib> 
+#include <set>
+#include <iostream>
+#include <stack>
 
 class TS_entry;
 

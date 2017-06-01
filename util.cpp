@@ -1,9 +1,5 @@
 #include "util.h"
 #include "TS_entry.h"
-#include <cstdlib> 
-#include <set>
-#include <iostream>
-#include <stack>
 
 std::unordered_map<std::string, std::string> hexmap{
     {"0000",   "0"},
@@ -16,12 +12,12 @@ std::unordered_map<std::string, std::string> hexmap{
     {"0111",   "7"},
     {"1000",   "8"},
     {"1001",   "9"},
-    {"1010",   "A"},
-    {"1011",   "B"},
-    {"1100",   "C"},
-    {"1101",   "D"},
-    {"1110",   "E"},
-    {"1111",   "F"}
+    {"1010",   "a"},
+    {"1011",   "b"},
+    {"1100",   "c"},
+    {"1101",   "d"},
+    {"1110",   "e"},
+    {"1111",   "f"}
 
 };
 

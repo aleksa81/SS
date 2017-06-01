@@ -77,6 +77,7 @@ protected:
     friend class Symbol;
     friend class Section;
     friend class Line;
+    friend class ObjFile;
     friend class Loader;
     friend class Relocation;
     friend class Parser;
@@ -126,6 +127,7 @@ public:
     friend class Parser;
     friend class Relocation;
     friend class Loader;
+    friend class ObjFile;
 };
 
 class Symbol: public TS_entry{
@@ -142,6 +144,7 @@ public:
     virtual std::string to_string() override;
 
     friend class TS_entry;
+    friend class ObjFile;
 };
 
 #endif

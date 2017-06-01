@@ -47,6 +47,8 @@ void Parser::parse(std::string file_name){
     if (was_ended == false) 
         Parser::error(".end missing.");
 
+    my_file.close();
+
     TS_entry::init();
 }
 

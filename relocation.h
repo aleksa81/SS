@@ -24,6 +24,8 @@ public:
 
     static void print_all();
 
+    friend class ObjFile;
+
 };
 
 #endif

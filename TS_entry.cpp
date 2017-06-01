@@ -245,7 +245,7 @@ std::string Section::to_string(){
 
     std::string ret;
 
-#ifdef PADDING
+
     ret = right_padding("SEG", 4) +
           left_padding(std::to_string(this->ID), 4) + 
           " " +
@@ -255,20 +255,6 @@ std::string Section::to_string(){
           left_padding(std::to_string(this->size), 7) +
           " " +
           flags;
-#else
-    ret = "SEG " +
-          std::to_string(this->ID) + 
-          " " +
-          this->name +
-          " " +
-          std::to_string(this->ID) + 
-          " " +
-          std::to_string(this->value) + 
-          " " +
-          std::to_string(this->size) +
-          " " +
-          flags;
-#endif
 
     return ret;
 }
@@ -280,7 +266,7 @@ std::string Symbol::to_string(){
     else if (this->type == SYMBOL_CONSTANT || this->section->is_static == true) 
         my_section = "-1";
     else 
-        my_section = std::to_string(this->section->ID);
+        my_section = this->section->getName();
 
     std::string scope;
     if (this->scope_flag == SCOPE_GLOBAL) scope = "G";
@@ -288,35 +274,20 @@ std::string Symbol::to_string(){
 
     std::string ret;
 
-#ifdef PADDING
-    ret = right_padding("SYM", 4) +
+
+    ret =  right_padding("SYM", 4) +
            left_padding(std::to_string(this->ID), 4) + 
            " " +
            right_padding(this->name, MAX_SYM_NAME_LEN) +
-           left_padding(my_section, 4) +
+           left_padding(my_section, MAX_SEG_NAME_LEN) +
            left_padding(std::to_string(this->value), 7) +
            " " +
            scope;
-#else
-    ret = "SYM " +
-          std::to_string(this->ID) + 
-          " " +
-          this->name +
-          " " +
-          my_section +
-          " " +
-          std::to_string(this->value) +
-          " " +
-          scope;
-#endif
 
     return ret;
 }
 
 void TS_entry::print_TS(){
-
-    //std::cout << "Number of sections: " << Section::num_of_sections << "."<<std::endl;
-    //std::cout << std::endl;
 
     std::cout << "SYMBOL TABLE" << std::endl;
 
@@ -368,7 +339,7 @@ void TS_entry::print_machine_code(){
             }
 
             //std::cout << "data size: " << dsize << " rept: " <<drept <<std::endl;
-#ifdef BINARY_MACHINE_CODE
+
             for (size_t i = 0; i < drept; i++){
                 for (size_t j = 0; j < dsize; j++){
                     std::bitset<8> bs(((Section*)s)->machine_code
@@ -377,18 +348,6 @@ void TS_entry::print_machine_code(){
                 }
                 std::cout << std::endl;
             }
-#else
-            for (size_t i = 0; i < drept; i++){
-                for (size_t j = 0; j < dsize; j++){
-                    std::bitset<8> bs(((Section*)s)->machine_code
-                        [dbase + (i+is_little_endian*1)*dsize-(1+j)*is_little_endian + j*(1-is_little_endian)]);
-                    std::string bsstring = bs.to_string();
-                    std::cout << str_to_hex(bsstring) << " ";
-                }
-                    
-                std::cout << std::endl;
-            }
-#endif
 
             dbase += dsize*drept;
 

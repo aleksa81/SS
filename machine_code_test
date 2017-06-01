@@ -1,10 +1,12 @@
-ORG 0
+;ORG 5
 .text.1
 DD 4
 x:DW 0xffee
 DB 0xff
 DD 0xff
-DW 12 DUP 3
+DD 12 DUP 3
+.bss
+DD 2 DUP ?
 
 ;ORG 20
 .text

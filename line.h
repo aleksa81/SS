@@ -39,6 +39,7 @@ public:
 
     friend class Loader;
     friend class TS_entry;
+    friend class ObjFile;
 };
 
 #endif

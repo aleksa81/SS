@@ -5,15 +5,15 @@
 #include "mchunk.h"
 #include "loader.h"
 #include "relocation.h"
+#include "objfile.h"
 
 int main(){
 
-    Parser::getInstance().parse("machine_code_test");
+    Parser::getInstance().parse("reloc_test");
 
     Line::print_all();
+
     TS_entry::print_TS();
-
-
 
     Loader::getInstance().load();
 
@@ -21,11 +21,7 @@ int main(){
 
     TS_entry::print_machine_code();
 
-
-    //std::cout << "OVDE" << std::endl;
-
-
-
+    ObjFile::getInstance().make("reloc_test_output");
 
     // std::string reg;
     // std::string disp;
@@ -37,9 +33,6 @@ int main(){
     //     std::cout << "Little endian" << std::endl;
     // else
     //     std::cout << "Big endian" << std::endl;
-
-
-
 
     //std::cout << str_to_int("0b11111111111111111111111111111111") << std::endl;
 

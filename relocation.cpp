@@ -33,29 +33,17 @@ std::string Relocation::to_string(){
 
     std::string ret;
 
-#ifdef PADDING
     ret = 
         left_padding(std::to_string(this->offset), 10) + 
         " " +
         right_padding(this->type, 3) + 
         " " +
-        right_padding(target, 15) ;
-        // +
-        // " " +
-        // left_padding(std::to_string(this->adr_field_value), 10);
-#else
-    ret = std::to_string(this->offset) + 
+        right_padding(target, 15)
+        +
         " " +
-        this->type + 
-        " " +
-        target ;
-        // +
-        // " " +
-        // std::to_string(this->adr_field_value);
-#endif
+        left_padding(std::to_string(this->adr_field_value), 6);
+
     return ret;
-
-
 }
 
 void Relocation::print_all(){
