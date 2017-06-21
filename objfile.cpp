@@ -73,14 +73,14 @@ void ObjFile::make(std::string file_name){
         // Print all relocation for current section
         for (Relocation* i = ((Section*)s)->reloc_head; i != nullptr; i=i->next){
 
-            unsigned target;
+            unsigned utarget;
             if (i->target == nullptr)
-                target = 0;
+                utarget = 0;
             else 
-                target = i->target->getID();
+                utarget = i->target->getID();
 
             output << "0x" << std::setfill('0') << std::setw(8) << std::hex << i->offset <<
-                      " " << i->type << " " << std::dec <<target << std::endl;
+                      " " << i->type << " " << std::dec << utarget << std::endl;
         }
 
         output << s->getName() << std::endl;

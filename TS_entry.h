@@ -40,7 +40,7 @@ private:
 
 public:
     TS_entry(std::string name);
-    virtual ~TS_entry() = default;
+    virtual ~TS_entry(){}
 
     void setID(unsigned int ID);
     unsigned int getID();
@@ -140,7 +140,7 @@ private:
 
 public:
     Symbol(std::string name, int value, Section* section);
-    virtual ~Symbol() override = default;
+    virtual ~Symbol() override= default;
 
     static void add_symbol_as_global(std::string name, int value);
     static bool add_symbol_as_defined(std::string name, int value, unsigned short type);

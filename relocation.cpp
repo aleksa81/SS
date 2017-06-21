@@ -21,27 +21,29 @@ Relocation::Relocation(int offset, std::string type, TS_entry* target, int adr_f
         Section::current->reloc_tail->next = this;
         Section::current->reloc_tail = this;
     }
+
+    //print_all();
 }
 
 std::string Relocation::to_string(){
 
-    std::string target;
+    std::string starget = "";
     if (this->target == nullptr)
-        target = "0";
+        starget = "0";
     else 
-        target = this->target->getName();
+        starget = this->target->getName();
 
-    std::string ret;
+    std::string ret = "";
 
     ret = 
-        left_padding(std::to_string(this->offset), 10) + 
+        left_padding(std::to_string(this->offset), 15) + 
         " " +
         right_padding(this->type, 3) + 
         " " +
-        right_padding(target, 15)
+        right_padding(starget, 15)
         +
         " " +
-        left_padding(std::to_string(this->adr_field_value), 6);
+        left_padding(std::to_string(this->adr_field_value), 10);
 
     return ret;
 }

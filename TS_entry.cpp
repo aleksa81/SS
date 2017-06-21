@@ -105,21 +105,21 @@ void TS_entry::init(){
 
 void TS_entry::clear(){
 
+    TS_entry* septr = Section::head;
+    while (septr != nullptr){
+        TS_entry* tmp = septr;
+        septr = septr->next;
+        delete tmp;
+    }
+
+    TS_entry* syptr = Symbol::head;
+    while (syptr != nullptr){
+        TS_entry* tmp = syptr;
+        syptr = syptr->next;
+        delete tmp;
+    }
+
     TS_entry::TS_entry_mapping.clear();
-
-    TS_entry* ptr = Section::head;
-    while (ptr != nullptr){
-        TS_entry* tmp = ptr;
-        ptr = ptr->next;
-        delete tmp;
-    }
-
-    ptr = Symbol::head;
-    while (ptr != nullptr){
-        TS_entry* tmp = ptr;
-        ptr = ptr->next;
-        delete tmp;
-    }
 }
 
 bool TS_entry::is_key_word(const std::string &str){
@@ -166,12 +166,10 @@ Section::~Section(){
 
     Relocation* reloc = this->reloc_head;
     while ( reloc != nullptr ){
-        Relocation* tmp = reloc;
+        Relocation* rtmp = reloc;
         reloc = reloc->next;
-        delete tmp;
+        delete rtmp;
     }
-
-    delete[] machine_code;
 } 
 
 void Section::setSize(size_t size){

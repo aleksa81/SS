@@ -7,9 +7,14 @@
 #include "relocation.h"
 #include "objfile.h"
 
-int main(){
+int main(int argc, char* argv[]){
 
-    Parser::getInstance().parse("reloc_test");
+    if (argc < 3){
+        std::cout << "Arguments missing." << std::endl;
+        exit(1);
+    }
+
+    Parser::getInstance().parse(argv[1]);
 
     Line::print_all();
 
@@ -21,10 +26,13 @@ int main(){
 
     TS_entry::print_machine_code();
 
-    ObjFile::getInstance().make("reloc_test_output");
+    ObjFile::getInstance().make(argv[2]);
+
+    Mchunk::clear();
 
     TS_entry::clear();
-    Mchunk::clear();
+
+    // --------------
 
     // std::string reg;
     // std::string disp;

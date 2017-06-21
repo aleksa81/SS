@@ -13,7 +13,6 @@ private:
     Mchunk* prev;
 public:
     Mchunk(int begin, int size);
-    ~Mchunk() = default;
 
     static void clear();
 };

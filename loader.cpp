@@ -127,7 +127,7 @@ void Loader::load(){
                 operand = line->ops[0];
                 *((int*)(Section::current->machine_code + Parser::location_counter)) |=  opcode[mne];
 
-                if (is_reg_dir(operand)){
+                if (is_reg_dir(operand) && Loader::is_INT(mne)){
                     Loader::process_reg_dir(REG0);
                     Parser::location_counter += line->getSize();
                     continue;
@@ -136,7 +136,7 @@ void Loader::load(){
                     process_reg_ind_disp(REG0);
                 else if (is_pc_rel(operand) && !Loader::is_INT(mne))
                     Loader::process_pc_rel(REG0);
-                else if (is_mem_dir(operand) && !Loader::is_INT(mne))
+                else if (is_mem_dir(operand) && !Loader::is_INT(mne) && !is_reg_dir(operand))
                     Loader::process_mem_dir();
                 else
                     Parser::error("Address mode mismatch.");
@@ -152,7 +152,7 @@ void Loader::load(){
                 *((int*)(Section::current->machine_code + Parser::location_counter)) |=  opcode[mne];
                 *((int*)(Section::current->machine_code + Parser::location_counter)) |= (regcode[line->ops[0]]<<REG1);
 
-                if (is_reg_dir(operand)){
+                if (is_reg_dir(operand) && !is_JZ(mne)){
                     Loader::process_reg_dir(REG0);
                     Parser::location_counter += line->getSize();
                     continue;
@@ -163,7 +163,7 @@ void Loader::load(){
                     Loader::process_pc_rel(REG0);
                 else if (is_immed(operand) && !is_store(mne) && !is_JZ(mne))
                     Loader::process_immed();
-                else if (is_mem_dir(operand))
+                else if (is_mem_dir(operand) && !is_reg_dir(operand))
                     Loader::process_mem_dir();
                 else
                     Parser::error("Address mode mismatch.");
@@ -262,6 +262,7 @@ void Loader::load(){
 
 
             if (reloc_symb == nullptr && adr_mode == PCREL){
+                //std::cout << "OVDE1 " <<std::endl;
 
                 if (Section::current->is_static == true){
                     *((int*)(Section::current->machine_code + Parser::location_counter + 4)) = value - Parser::location_counter - Section::current->getValue() - 8;
@@ -273,6 +274,7 @@ void Loader::load(){
 
             }
             else if (reloc_symb != nullptr && adr_mode == PCREL){
+                //std::cout << "OVDE2 " << reloc_symb->getName() <<std::endl;
 
                 if (reloc_symb->getType() != SYMBOL_EXTERN && reloc_symb->getSection()->getID() == Section::current->getID()){
                     *((int*)(Section::current->machine_code + Parser::location_counter + 4)) = value - Parser::location_counter - 8;
@@ -287,6 +289,7 @@ void Loader::load(){
                 }
             }
             else if (reloc_symb != nullptr && (adr_mode == IMMED || adr_mode == MEMDIR || adr_mode == REGINDDISP)){
+                //std::cout << "OVDE3 " << reloc_symb->getName() <<std::endl;
 
                 if (reloc_symb->getScope() == SCOPE_GLOBAL){
                     *((int*)(Section::current->machine_code + Parser::location_counter + 4)) = value - reloc_symb->getValue(); // CHECK THIS, reloc symb can't be after - in const expr.
@@ -298,6 +301,7 @@ void Loader::load(){
                 }
             }
             else if (reloc_symb == nullptr && (adr_mode == IMMED || adr_mode == MEMDIR || adr_mode == REGINDDISP)){
+                //std::cout << "OVDE4 " <<std::endl;
                 *((int*)(Section::current->machine_code + Parser::location_counter + 4)) = value;
             }
             

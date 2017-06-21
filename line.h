@@ -31,8 +31,6 @@ public:
          size_t size,
          bool is_section);
 
-    ~Line() = default;
-
     size_t getSize();
 
     std::string to_string();

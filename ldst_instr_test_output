@@ -1,0 +1,9 @@
+#TabelaSimbola
+SEG 1 .text.1 1 0x0000000a 0x0000000c XPAS
+SEG 2 .data.2 2 0x00000000 0x00000005 WPAS
+SYM 3 a -1 0x00000001 L
+.text.1
+c0 10 01 30 00 08 f1 10 eb ff ff ff 
+.data.2
+04 05 00 00 00 
+#end

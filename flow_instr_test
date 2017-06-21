@@ -1,0 +1,46 @@
+
+.text.1
+
+a:INT R1
+
+JMP [R2]
+JMP [R2+0x5]
+JMP $a
+
+CALL [R2]
+CALL [R2+0x5]
+CALL $a
+
+RET
+
+JZ R3, [R2]
+JZ R3, [R2+0x5]
+JZ R3, $a
+JZ R3, a
+
+JNZ R3, [R2]
+JNZ R3, [R2+0x5]
+JNZ R3, $a
+JNZ R3, a
+
+JGZ R3, [R2]
+JGZ R3, [R2+0x5]
+JGZ R3, $a
+JGZ R3, a
+
+JGEZ R3, [R2]
+JGEZ R3, [R2+0x5]
+JGEZ R3, $a
+JGEZ R3, a
+
+JLZ R3, [R2]
+JLZ R3, [R2+0x5]
+JLZ R3, $a
+JLZ R3, a
+
+JLEZ R3, [R2]
+JLEZ R3, [R2+0x5]
+JLEZ R3, $a
+JLEZ R3, a
+
+.end
