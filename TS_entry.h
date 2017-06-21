@@ -40,6 +40,7 @@ private:
 
 public:
     TS_entry(std::string name);
+    virtual ~TS_entry() = default;
 
     void setID(unsigned int ID);
     unsigned int getID();
@@ -65,6 +66,7 @@ public:
     static void print_TS();
     static void print_machine_code();
     static void init();
+    static void clear();
 
     virtual std::string to_string(){
         return "TS_entry";
@@ -109,6 +111,7 @@ public:
     unsigned short flags;
 
     Section(std::string name);
+    virtual ~Section() override;
 
     void setSize(size_t size);
     size_t getSize();
@@ -137,6 +140,7 @@ private:
 
 public:
     Symbol(std::string name, int value, Section* section);
+    virtual ~Symbol() override = default;
 
     static void add_symbol_as_global(std::string name, int value);
     static bool add_symbol_as_defined(std::string name, int value, unsigned short type);

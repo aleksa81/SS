@@ -23,6 +23,9 @@ int main(){
 
     ObjFile::getInstance().make("reloc_test_output");
 
+    TS_entry::clear();
+    Mchunk::clear();
+
     // std::string reg;
     // std::string disp;
     // bool a = is_reg_ind_disp("[R1+b]", reg, disp);

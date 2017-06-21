@@ -30,3 +30,12 @@ Mchunk::Mchunk(int begin, int size){
         Mchunk::tail = this;
     }
 }
+
+void Mchunk::clear(){
+    Mchunk* ptr = Mchunk::head;
+    while (ptr != nullptr){
+        Mchunk* tmp = ptr;
+        ptr = ptr->next;
+        delete tmp;
+    }
+}

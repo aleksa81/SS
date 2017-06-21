@@ -23,7 +23,7 @@ void ObjFile::make(std::string file_name){
         else flags.append("-");
 
 
-        output << "SEG " << i->ID << "" << i->getName() << " " << i->ID << 
+        output << "SEG " << i->ID << " " << i->getName() << " " << i->ID << 
                   " 0x" << std::setfill('0') << std::setw(8) << std::hex << i->getValue() <<
                   " 0x" << std::setfill('0') << std::setw(8) << std::hex << ((Section*)i)->getSize() << " " <<
                   flags << std::endl;

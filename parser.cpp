@@ -283,7 +283,7 @@ bool Parser::is_instruction(std::string &line){
         if (Section::current->getType() != SECTION_TEXT)
             Parser::error("Instruction not in .text section.");
 
-        // Strip off mnemonic and make ops_string which contains all the operands.
+        // Make ops_string which contains all the operands.
         std::string ops_string = line.substr(found+1, std::string::npos);
 
         // Strip off spaces from ops_string.

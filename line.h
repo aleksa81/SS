@@ -31,6 +31,8 @@ public:
          size_t size,
          bool is_section);
 
+    ~Line() = default;
+
     size_t getSize();
 
     std::string to_string();
@@ -40,6 +42,7 @@ public:
     friend class Loader;
     friend class TS_entry;
     friend class ObjFile;
+    friend class Section;
 };
 
 #endif

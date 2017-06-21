@@ -20,11 +20,14 @@ public:
 
     Relocation(int offset, std::string type, TS_entry* target, int adr_field_value );
 
+    ~Relocation() = default;
+
     std::string to_string();
 
     static void print_all();
 
     friend class ObjFile;
+    friend class Section;
 
 };
 

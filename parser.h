@@ -19,6 +19,7 @@ private:
     static bool was_ended;
 
     Parser(){}
+    ~Parser() = default;
 
     static void get_label(std::string &line);
     static bool is_end(std::string &line);

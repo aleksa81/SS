@@ -1,0 +1,11 @@
+#TabelaSimbola
+SEG 1 .text.1 1 0x00000000 0x00000010 XPAS
+SEG 2 .data.1 2 0x00000000 0x0000001b WPA-
+SYM 3 a -1 0x00000000 L
+SYM 4 b -1 0x00000008 L
+.text.1
+00 00 f1 04 f8 ff ff ff 00 08 c0 04 08 00 00 00 
+.data.1
+0a 00 00 00 0a 00 00 00 0a 00 00 00 0a 00 00 00 
+0a 00 00 00 03 05 00 08 00 00 00 
+#end

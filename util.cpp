@@ -328,6 +328,8 @@ std::string infix_to_postfix(std::string input){
     
     strip_off_spaces(output);
 
+    delete op_stack;
+
     return output;
 }
 
@@ -427,6 +429,8 @@ int calc_postfix(std::string input, TS_entry*& reloc_symb){
     }
     else 
         Parser::error("Operand unknown in constant expression.");
+
+    delete ops_stack;
 
     return ivalue;
 }

@@ -103,6 +103,25 @@ void TS_entry::init(){
     }
 }
 
+void TS_entry::clear(){
+
+    TS_entry::TS_entry_mapping.clear();
+
+    TS_entry* ptr = Section::head;
+    while (ptr != nullptr){
+        TS_entry* tmp = ptr;
+        ptr = ptr->next;
+        delete tmp;
+    }
+
+    ptr = Symbol::head;
+    while (ptr != nullptr){
+        TS_entry* tmp = ptr;
+        ptr = ptr->next;
+        delete tmp;
+    }
+}
+
 bool TS_entry::is_key_word(const std::string &str){
     if (TS_entry::system_defined_words.find(str) == TS_entry::system_defined_words.end()) 
         return false;
@@ -135,6 +154,24 @@ Section::Section(std::string name):TS_entry(name){
         this->prev = Section::tail;
         Section::tail = this;
     }
+}
+
+Section::~Section(){
+    Line* line = this->line_head;
+    while ( line != nullptr ){
+        Line* tmp = line;
+        line = line->next;
+        delete tmp;
+    }
+
+    Relocation* reloc = this->reloc_head;
+    while ( reloc != nullptr ){
+        Relocation* tmp = reloc;
+        reloc = reloc->next;
+        delete tmp;
+    }
+
+    delete[] machine_code;
 } 
 
 void Section::setSize(size_t size){
