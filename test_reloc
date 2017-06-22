@@ -64,6 +64,8 @@ DD c                   ; c nije iz ORG + c je globalan [+RELOC]
 DD e                   ; e nije iz ORG + e je lokalan [+RELOC]
 DD x                   ; x iz ORG [-RELOC]
 DD d                   ; d je extern [+RELOC]
+DB 3 DUP 5
+DW 3 DUP 5                   
 end3:
 
 .end
